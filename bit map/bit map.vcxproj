@@ -131,11 +131,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\SomeClass.cpp" />
+    <ClCompile Include="src\BitmapAtHome.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\pch.h" />
-    <ClInclude Include="headers\SomeClass.h" />
+    <ClInclude Include="headers\BitmapAtHome.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="smile.bmp" />
