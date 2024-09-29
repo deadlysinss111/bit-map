@@ -16,7 +16,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	bmp.LoadFile("titre.bmp");
 	bmp.Upscale();
-	bmp.Upscale();
 
 	//int rgb[3] = { 0, 0, 0 };
 	//bmp.ChangePixelAt(12, 2, rgb);
