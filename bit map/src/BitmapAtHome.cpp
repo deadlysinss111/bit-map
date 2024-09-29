@@ -80,7 +80,7 @@ bool BitmapAtHome::ChangePixelAt(int x, int y, int rgb[3]) {
 	return true;
 }
 
-void BitmapAtHome::Upscale(int iterations = 1) {
+void BitmapAtHome::Upscale(int iterations) {
 	for (int i = 0; i < iterations; i++) {
 		InternalUpscale();
 	}

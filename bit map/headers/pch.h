@@ -10,9 +10,12 @@
 #include <wingdi.h>
 
 class BitmapAtHome;
+class InfectedBitmap;
 class WindowHandler;
 
 struct WindowCustomParam;
+struct CustomHeader;
 
 #include "BitmapAtHome.h"
+#include "InfectedBitmap.h"
 #include "WindowHandler.h"

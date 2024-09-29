@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\InfectedBitmap.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\BitmapAtHome.cpp" />
     <ClCompile Include="src\WindowHandler.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="headers\pch.h" />
     <ClInclude Include="headers\BitmapAtHome.h" />
     <ClInclude Include="headers\WindowHandler.h" />
+    <ClInclude Include="headers\InfectedBitmap.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="smile.bmp" />
