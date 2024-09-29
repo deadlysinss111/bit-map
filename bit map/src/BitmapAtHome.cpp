@@ -13,6 +13,7 @@ BitmapAtHome::~BitmapAtHome() {
 	delete(_infoHeader);
 	if (_originAddr != nullptr) {
 		// memory leak for now
+		free(_originAddr);
 	}
 }
 
@@ -32,7 +33,7 @@ void BitmapAtHome::LoadFile(const char* addr) {
 	fseek(file, 0, SEEK_SET);
 
 	//reading file
-	_originAddr = new BYTE[_size];
+	_originAddr = (BYTE*)malloc(_size);
 	fread(_originAddr, 1, _size, file);
 	fclose(file);
 
@@ -46,12 +47,12 @@ void BitmapAtHome::LoadFile(const char* addr) {
 	_colorTable = _originAddr + _fileHeader->bfOffBits;
 
 	//we swap to rgb so that it's easier to work on the file
-	SwapRnB(_size - (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)));
+	//SwapRnB(_size - (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)));
 }
 
 void BitmapAtHome::WriteInFile(const char* name) {
 	//dont forget to turn back to bgr
-	SwapRnB(_size - (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)));
+	//SwapRnB(_size - (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)));
 
 	FILE* target;
 	fopen_s(&target, name, "wb");
@@ -77,4 +78,57 @@ bool BitmapAtHome::ChangePixelAt(int x, int y, int rgb[3]) {
 	_colorTable[3 * (x + width * (height - y)) + 1] = rgb[1];
 	_colorTable[3 * (x + width * (height - y)) + 2] = rgb[2];
 	return true;
+}
+
+void BitmapAtHome::Upscale(int iterations = 1) {
+	for (int i = 0; i < iterations; i++) {
+		InternalUpscale();
+	}
+}
+
+// Double the size of the bmp
+void BitmapAtHome::InternalUpscale() {
+	int newWidth = _infoHeader->biWidth * 2;
+	int newHeight = _infoHeader->biHeight * 2;
+	int bytesPerPixel = _infoHeader->biBitCount / 8;
+
+	int newRowSize = ((newWidth * _infoHeader->biBitCount + 31) / 32) * 4;
+
+	BYTE* addr = (BYTE*)malloc(newRowSize * newHeight + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER));
+
+	memcpy(addr, _originAddr, sizeof(BITMAPFILEHEADER));
+	memcpy(_fileHeader, addr, sizeof(BITMAPFILEHEADER));
+	memcpy(addr + sizeof(BITMAPFILEHEADER), _originAddr + sizeof(BITMAPFILEHEADER), sizeof(BITMAPINFOHEADER));
+	memcpy(_infoHeader, _originAddr + sizeof(BITMAPFILEHEADER), sizeof(BITMAPINFOHEADER));
+	BYTE* colorAddr = addr + _fileHeader->bfOffBits;
+
+	for (int j = 0; j < _infoHeader->biHeight; j++) {
+		for (int i = 0; i < _infoHeader->biWidth; i++) {
+
+			// Let's retrieve the pixel we want to copy
+			int srcIndex = (i + j * _infoHeader->biWidth) * bytesPerPixel;
+			BYTE* pixelData = _colorTable + srcIndex;
+
+			// We are looking for the base destination in our copy bmp
+			int destIndex = (i*2 + j*2* newWidth) * bytesPerPixel;
+
+			// For each of the r, g and b value
+			for (int b = 0; b < bytesPerPixel; b++) {
+				// We copy it into a square of 4 pixels (the first one being the base destination we searched for just before) into our copy bmp
+				colorAddr[destIndex + b] = pixelData[b];
+				colorAddr[destIndex + b + bytesPerPixel] = pixelData[b];
+				colorAddr[destIndex + b + newWidth * bytesPerPixel] = pixelData[b];
+				colorAddr[destIndex + b + newWidth * bytesPerPixel + bytesPerPixel] = pixelData[b];
+			}
+		}
+	}
+
+	_infoHeader->biWidth = newWidth;
+	_infoHeader->biHeight = newHeight;
+	_infoHeader->biSizeImage = newRowSize * newHeight;
+	_size = newRowSize * newHeight + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	free(_originAddr);
+	_originAddr = addr;
+	_colorTable = colorAddr;
+	_fileHeader->bfSize = newRowSize * newHeight + sizeof(BITMAPINFOHEADER);
 }

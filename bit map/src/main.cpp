@@ -1,19 +1,33 @@
 #include "pch.h"
 
 
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 
-int main(int argc, int argv) {
+	AllocConsole();
+	FILE* consoleOut;
+	freopen_s(&consoleOut, "CONOUT$", "w", stdout);
+	freopen_s(&consoleOut, "CONOUT$", "w", stderr);
+
+
+	WindowHandler handler(hInstance);
 	
+
 	BitmapAtHome bmp;
 
-	bmp.LoadFile("red.bmp");
-	int rgb[3] = { 0, 0, 0 };
-	bmp.ChangePixelAt(12, 2, rgb);
-	bmp.WriteInFile("textFile.bmp");
+	bmp.LoadFile("titre.bmp");
+	bmp.Upscale();
+	bmp.Upscale();
 
+	//int rgb[3] = { 0, 0, 0 };
+	//bmp.ChangePixelAt(12, 2, rgb);
+	//bmp.WriteInFile("textFile.bmp");
 
-	//HBITMAP hbmp = CreateBitmap(infoHeader.biWidth, infoHeader.biHeight, infoHeader.biPlanes, infoHeader.biBitCount, NULL);
-	//HGDIOBJ bmpObj = SelectObject(, hbmp)
+	WindowCustomParam param;
+	param.bmp = &bmp;
+	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);
+	param.hBmp = &hBmp;
+	handler.SetCustomParam(&param);
+	handler.CallRedraw();
+
+	handler.RunWindow();
 }
-
-

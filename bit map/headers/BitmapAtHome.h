@@ -10,12 +10,16 @@ public:
 
 	void SwapRnB(int colorTableSize);
 	bool ChangePixelAt(int x, int y, int rgb[3]);
+	void Upscale(int iterations = 1);
 
-private:
+	//TODO do accessibility levels properly later
+public:
 	int _size;
 	BYTE* _originAddr;
 
 	BITMAPFILEHEADER* _fileHeader;
 	BITMAPINFOHEADER* _infoHeader;
 	BYTE* _colorTable;
+
+	void InternalUpscale();
 };

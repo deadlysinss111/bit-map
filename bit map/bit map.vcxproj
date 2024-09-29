@@ -109,7 +109,7 @@
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -132,10 +132,12 @@
   <ItemGroup>
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\BitmapAtHome.cpp" />
+    <ClCompile Include="src\WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\pch.h" />
     <ClInclude Include="headers\BitmapAtHome.h" />
+    <ClInclude Include="headers\WindowHandler.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="smile.bmp" />
