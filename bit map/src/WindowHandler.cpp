@@ -10,6 +10,20 @@ WindowHandler::WindowHandler(HINSTANCE hInstance) {
     {
         throw new std::exception("error in window creation");
     }
+
+    /* Initalizes common controls */
+    INITCOMMONCONTROLSEX icex;
+    icex.dwSize = sizeof(INITCOMMONCONTROLSEX);
+    icex.dwICC = ICC_TAB_CLASSES; // Initialize tab control class
+    InitCommonControlsEx(&icex);
+
+
+    /* Initializes UI Elements */
+    RECT rcApp;
+    GetClientRect(_hWnd, &rcApp);
+    _hTabControl = CreateWindow(WC_TABCONTROL, L"", WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE, _globalPad, _globalPad, rcApp.right, rcApp.bottom, _hWnd, NULL, _hInstance, NULL);
+    _TCIEncode.mask = TCIF_TEXT;
+
 }
 
 WindowHandler::~WindowHandler() {
@@ -67,15 +81,14 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
         // Need to define a scope otherwise compiler isn't happy with variable definition
         {
             PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
+            HDC hDC = BeginPaint(hWnd, &ps);
 
             HBITMAP hBmp = *customParam->hBmp;
-            HDC memDC = CreateCompatibleDC(hdc);
+            HDC memDC = CreateCompatibleDC(hDC);
             SelectObject(memDC, hBmp);
 
-            //StretchBlt(hdc, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
-            BitBlt(hdc, 10, 10, customParam->bmp->_infoHeader->biWidth, customParam->bmp->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
-            
+            //StretchBlt(hDC, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
+            BitBlt(hDC, 10, 10, customParam->bmp->_infoHeader->biWidth, customParam->bmp->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
         }
         break;
     case WM_DESTROY:
@@ -89,8 +102,8 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 HBITMAP WindowHandler::CreateBmpHandler(BitmapAtHome* bmp) {
     // Set that in it's own function rather than directly in the WinProc for performences reasons
-    HDC hdc = GetDC(_hWnd);
-    return  CreateDIBitmap(hdc, bmp->_infoHeader, CBM_INIT, bmp->_colorTable, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
+    HDC hDC = GetDC(_hWnd);
+    return  CreateDIBitmap(hDC, bmp->_infoHeader, CBM_INIT, bmp->_colorTable, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
 }
 
 void WindowHandler::SetCustomParam(WindowCustomParam* param) {

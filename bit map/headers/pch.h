@@ -9,6 +9,11 @@
 #include <Windows.h>
 #include <wingdi.h>
 
+// Used for Common Controls, mainly tabs
+#include <commctrl.h>
+#pragma comment(lib, "comctl32.lib")
+
+
 class BitmapAtHome;
 class WindowHandler;
 
