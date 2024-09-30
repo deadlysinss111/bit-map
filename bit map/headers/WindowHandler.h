@@ -2,6 +2,12 @@
 #define ENCODE_TAB_INDEX 0
 #define DECODE_TAB_INDEX 1
 
+struct WindowCustomParam {
+	WindowHandler* windowHandler;
+	BitmapAtHome* bitmapAtHome;
+	HBITMAP* hBmp;
+};
+
 class WindowHandler
 {
 public:
@@ -14,12 +20,13 @@ public:
 	void SetCustomParam(WindowCustomParam* param);
 	void CallRedraw();
 
+	// Public since we need main.cpp to fill some of its fields
+	static WindowCustomParam _cParam;
+
 private:
 	HINSTANCE _hInstance;
 	HWND _hWnd;
 	HDC _hDc;
-
-	static WindowCustomParam _cParam;
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void RegisterWindowClass();
@@ -43,10 +50,4 @@ private:
 	   UI Elements : Padding constants
 	*/
 	short _globalPad = 5;	// Padding away from the top-left (in both directions)
-};
-
-struct WindowCustomParam {
-	WindowHandler* windowHandler;
-	BitmapAtHome* bitmapAtHome;
-	HBITMAP* hBmp;
 };

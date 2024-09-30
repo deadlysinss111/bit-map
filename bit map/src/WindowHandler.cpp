@@ -1,5 +1,8 @@
 #include "pch.h"
 
+/* Static fields definition */
+WindowCustomParam WindowHandler::_cParam;
+
 WindowHandler::WindowHandler(HINSTANCE hInstance) {
     _hInstance = hInstance;
 
@@ -13,12 +16,11 @@ WindowHandler::WindowHandler(HINSTANCE hInstance) {
 
     /*
        Prepares the static WindowCustomParam structure, used to call functions when message pumping
+       - Sets a pointer to its own home class
+       - The other 2 fields are set in main.cpp
     */
-    //SetCustomParam(&_cParam);
+    SetCustomParam(&_cParam);
     _cParam.windowHandler = this;
-    // TODO: Set the other members accordingly when merging
-    _cParam.bitmapAtHome = NULL;
-    _cParam.hBmp = NULL;
 
     /*
        Initalizes common controls
@@ -108,9 +110,24 @@ void WindowHandler::RegisterWindowClass() {
     RegisterClass(&wc);
 }
 
-LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
-    //_cParam = *(WindowCustomParam*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
-    //WindowCustomParam* customParam = (WindowCustomParam*)GetWindowLongPtr(hWnd, GWLP_USERDATA);
+LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+    //if (_cParam.windowHandler == nullptr) std::cerr << "winH  ";
+    //if (_cParam.bitmapAtHome == nullptr) std::cerr << "bmpH  ";
+    //if (_cParam.hBmp == nullptr) std::cerr << "hBmp  ";
+
+    //if (_cParam.windowHandler == nullptr || _cParam.bitmapAtHome == nullptr || _cParam.hBmp == nullptr)
+    //{
+    //    std::cerr << "are nullptr\n";
+    //    return E_FAIL;
+    //}
+    
+    if (_cParam.windowHandler == nullptr || _cParam.bitmapAtHome == nullptr || _cParam.hBmp == nullptr)
+    {
+        std::cerr << "It's too soon...\n";
+        return E_FAIL;
+    }
+
 
     switch (uMsg)
     {
@@ -132,10 +149,11 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
             switch (TabCtrl_GetCurSel(_cParam.windowHandler->_hTabControl))
             {
             case ENCODE_TAB_INDEX:
-                // Creates into the window every UI Elements, and calls RedrawWindow
+                SendMessage(_cParam.windowHandler->_hStatic, WM_SETTEXT, 0, (LPARAM) &(_cParam.windowHandler->_encodeTabName));
                 break;
             case DECODE_TAB_INDEX:
-                // Creates into the window every UI Elements, and calls RedrawWindow
+                
+                SendMessage(_cParam.windowHandler->_hStatic, WM_SETTEXT, 0, (LPARAM) &(_cParam.windowHandler->_decodeTabName));
             }
             break;
         }
@@ -152,6 +170,16 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
             //StretchBlt(hDC, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
             BitBlt(hDC, 10, 10, _cParam.bitmapAtHome->_infoHeader->biWidth, _cParam.bitmapAtHome->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
+            
+            //PAINTSTRUCT ps;
+            //HDC hdc = BeginPaint(hWnd, &ps);
+
+            //HBITMAP hBmp = *customParam->hBmp;
+            //HDC memDC = CreateCompatibleDC(hdc);
+            //SelectObject(memDC, hBmp);
+
+            ////StretchBlt(hdc, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
+            //BitBlt(hdc, 10, 10, customParam->bitmapAtHome->_infoHeader->biWidth, customParam->bitmapAtHome->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
         }
         break;
     case WM_DESTROY:

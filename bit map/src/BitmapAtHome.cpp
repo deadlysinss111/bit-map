@@ -38,7 +38,6 @@ void BitmapAtHome::LoadFile(const char* addr) {
 	fclose(file);
 
 	//copying parts of it into headers
-	//ask sylvain how to get ride of that memory
 	memcpy(_fileHeader, _originAddr, sizeof(BITMAPFILEHEADER));
 
 	memcpy(_infoHeader, _originAddr + sizeof(BITMAPFILEHEADER), sizeof(BITMAPINFOHEADER));
