@@ -1,4 +1,6 @@
 #pragma once
+#define ENCODE_TAB_INDEX 0
+#define DECODE_TAB_INDEX 1
 
 class WindowHandler
 {
@@ -15,20 +17,27 @@ public:
 private:
 	HINSTANCE _hInstance;
 	HWND _hWnd;
-	// TODO: hDc
+	HDC _hDc;
 
-	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static WindowCustomParam _cParam;
+
+	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void RegisterWindowClass();
 	HWND CreateMainWindow();
 
 	/*
 	   UI Elements : Tabs
 	*/
-	HWND _hTabControl;		// Handle to the Tab Control
+	HWND _hTabControl;							// Handle to the Tab Control
+	wchar_t _encodeTabName[50] = L"Encode";		// duh
+	wchar_t _decodeTabName[50] = L"Decode";		// duh
+	HWND _hStatic;								// Handle to the Static controle (where the displaying takes place)
 
-	TCITEM _TCIEncode;		// Handle to the Tab Item for the encoding display
-	TCITEM _TCIDecode;		// Handle to the Tab Item for the decoding display
-	HWND _hStatic;			// Handle to the Static controle (where the displaying takes place)
+	HRESULT ResizeTabControl(LPARAM ARGlParam);
+
+	/*
+	   UI Elements : File Selectors, Bitmap Outlines, Buttons, Texts
+	*/
 
 	/*
 	   UI Elements : Padding constants
@@ -37,6 +46,7 @@ private:
 };
 
 struct WindowCustomParam {
-	BitmapAtHome* bmp;
+	WindowHandler* windowHandler;
+	BitmapAtHome* bitmapAtHome;
 	HBITMAP* hBmp;
 };
