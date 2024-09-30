@@ -13,7 +13,7 @@ BitmapAtHome::~BitmapAtHome() {
 	delete(_infoHeader);
 	if (_originAddr != nullptr) {
 		// memory leak for now
-		free(_originAddr);
+		delete _originAddr;
 	}
 }
 
@@ -33,12 +33,11 @@ void BitmapAtHome::LoadFile(const char* addr) {
 	fseek(file, 0, SEEK_SET);
 
 	//reading file
-	_originAddr = (BYTE*)malloc(_size);
+	_originAddr = new BYTE[_size];
 	fread(_originAddr, 1, _size, file);
 	fclose(file);
 
 	//copying parts of it into headers
-	//ask sylvain how to get ride of that memory
 	memcpy(_fileHeader, _originAddr, sizeof(BITMAPFILEHEADER));
 
 	memcpy(_infoHeader, _originAddr + sizeof(BITMAPFILEHEADER), sizeof(BITMAPINFOHEADER));
@@ -94,7 +93,7 @@ void BitmapAtHome::InternalUpscale() {
 
 	int newRowSize = ((newWidth * _infoHeader->biBitCount + 31) / 32) * 4;
 
-	BYTE* addr = (BYTE*)malloc(newRowSize * newHeight + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER));
+	BYTE* addr = new BYTE[newRowSize * newHeight + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)];
 
 	memcpy(addr, _originAddr, sizeof(BITMAPFILEHEADER));
 	memcpy(_fileHeader, addr, sizeof(BITMAPFILEHEADER));
@@ -127,7 +126,7 @@ void BitmapAtHome::InternalUpscale() {
 	_infoHeader->biHeight = newHeight;
 	_infoHeader->biSizeImage = newRowSize * newHeight;
 	_size = newRowSize * newHeight + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-	free(_originAddr);
+	delete _originAddr;
 	_originAddr = addr;
 	_colorTable = colorAddr;
 	_fileHeader->bfSize = newRowSize * newHeight + sizeof(BITMAPINFOHEADER);

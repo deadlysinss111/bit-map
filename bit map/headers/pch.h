@@ -16,7 +16,7 @@ class WindowHandler;
 struct WindowCustomParam;
 struct CustomHeader;
 
-#define CUSTOMHEADERSIZE = 80
+
 
 #include "BitmapAtHome.h"
 #include "InfectedBitmap.h"

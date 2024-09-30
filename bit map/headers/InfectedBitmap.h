@@ -1,5 +1,9 @@
 #pragma once
 
+#define CUSTOMHEADERSIZE 10
+#define CHEADER_SIZE 8
+#define CHEADER_EXTENSION 2
+
 struct CustomHeader {
 	uint64_t size;
 	uint16_t extension;

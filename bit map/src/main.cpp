@@ -21,12 +21,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	InfectedBitmap* test = InfectedBitmap::InfectBmp(&bmp);
 
 
+
+
+
 	const char* str = "test";
 	BYTE* bStr = (BYTE*)str;
+	test->HideData(bStr, 5);
 
-	test->HideData(bStr, 4);
+
+
+
+
 	//test->SaveAsFile("ratilo.bmp");
-
 	//int rgb[3] = { 0, 0, 0 };
 	//bmp.ChangePixelAt(12, 2, rgb);
 	//bmp.SaveAsFile("textFile.bmp");
@@ -40,7 +46,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 	BYTE* result = test->ReadHiddenData();
-	std::cout << (char*)result << std::endl;
+	std::cout << "result is : "<< (char*)result << std::endl;
 
 	handler.RunWindow();
 }
