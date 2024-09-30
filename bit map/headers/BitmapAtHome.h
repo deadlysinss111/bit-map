@@ -6,7 +6,7 @@ public:
 	~BitmapAtHome();
 
 	void LoadFile(const char* addr);
-	void WriteInFile(const char* name);
+	void SaveAsFile(const char* name);
 
 	void SwapRnB(int colorTableSize);
 	bool ChangePixelAt(int x, int y, int rgb[3]);

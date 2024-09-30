@@ -1,7 +1,8 @@
 #pragma once
 
 struct CustomHeader {
-
+	uint64_t size;
+	uint16_t extension;
 };
 
 
@@ -11,15 +12,21 @@ public:
 	~InfectedBitmap();
 
 	static InfectedBitmap* InfectBmp(BitmapAtHome* src, BYTE* data, int dataLengh);
+	static InfectedBitmap* InfectBmp(BitmapAtHome* src);
 
-	void WriteDataInBmp(BYTE* data, int dataLengh);
-	BYTE* ReadDataInBmp(int dataLengh);
+	void HideData(BYTE* data, int dataLengh);
+	BYTE* ReadHiddenData();
 
 private:
 	InfectedBitmap();
 
+	void HideDataHeader(int dataLengh);
+	void InternalHideData(BYTE* data, int dataLengh, int startingPoint = 0);
+
+	void ReadCustomHeader();
+	BYTE* InternalReadHiddenData(int dataLengh, int startingPoint = 0);
 	
 
-	CustomHeader CustomInfoHeader;
+	CustomHeader* _customInfoHeader;
 };
 

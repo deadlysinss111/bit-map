@@ -18,18 +18,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//bmp.Upscale(2);
 
 	BYTE* ch = new BYTE;
-	InfectedBitmap* test = InfectedBitmap::InfectBmp(&bmp, ch, 2);
+	InfectedBitmap* test = InfectedBitmap::InfectBmp(&bmp);
 
 
 	const char* str = "test";
 	BYTE* bStr = (BYTE*)str;
 
-	test->WriteDataInBmp(bStr, 4);
-	//test->WriteInFile("ratilo.bmp");
+	test->HideData(bStr, 4);
+	//test->SaveAsFile("ratilo.bmp");
 
 	//int rgb[3] = { 0, 0, 0 };
 	//bmp.ChangePixelAt(12, 2, rgb);
-	//bmp.WriteInFile("textFile.bmp");
+	//bmp.SaveAsFile("textFile.bmp");
 
 	WindowCustomParam param;
 	param.bmp = test;
@@ -39,7 +39,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	handler.CallRedraw();
 
 
-	BYTE* result = test->ReadDataInBmp(4);
+	BYTE* result = test->ReadHiddenData();
 	std::cout << (char*)result << std::endl;
 
 	handler.RunWindow();

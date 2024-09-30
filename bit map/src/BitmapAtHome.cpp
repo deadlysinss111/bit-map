@@ -50,7 +50,7 @@ void BitmapAtHome::LoadFile(const char* addr) {
 	//SwapRnB(_size - (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)));
 }
 
-void BitmapAtHome::WriteInFile(const char* name) {
+void BitmapAtHome::SaveAsFile(const char* name) {
 	//dont forget to turn back to bgr
 	//SwapRnB(_size - (sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)));
 
