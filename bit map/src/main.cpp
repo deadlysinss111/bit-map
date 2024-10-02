@@ -14,15 +14,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	BitmapFile bmp;
 
-	bmp.LoadFile("red.bmp");
+	bmp.LoadFile("long.bmp");
 	//bmp.Upscale(2);
 
 	BitmapToolbox toolbox;
 
 	const char* str = "test";
-	BYTE* bStr = (BYTE*)str;
-	toolbox.HideData(&bmp, bStr, 5);
 
+	RawFile test;
+	test.LoadFile("ff.png");
+
+	
+
+	BYTE* bStr = (BYTE*)str;
+	toolbox.HideData(&bmp, test._buffer, test._size, "png");
 
 
 
@@ -39,9 +44,23 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	handler.SetCustomParam(&param);
 	handler.CallRedraw();
 
+	BYTE* extension;
+	BYTE* result = toolbox.ReadHiddenData(&bmp, &extension);
 
-	BYTE* result = toolbox.ReadHiddenData(&bmp);
-	std::cout << "result is : "<< (char*)result << std::endl;
+	std::string name;
+
+	char* appended = new char[100];
+	strcpy(appended, "jvjvj");
+	strcat(appended, (char*)extension);
+	
+	FILE* target;
+	fopen_s(&target, appended, "wb");
+	fwrite(result, 1, test._size, target);
+	fclose(target);
+
+	delete result;
+
+	//std::cout << "result is : "<< (char*)result << "." << (char*)extension << std::endl;
 
 	handler.RunWindow();
 }

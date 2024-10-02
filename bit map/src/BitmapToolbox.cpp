@@ -1,4 +1,5 @@
 #include "pch.h"
+#include <bitset>
 
 BitmapToolbox::BitmapToolbox() {
 
@@ -86,24 +87,28 @@ void BitmapToolbox::InternalUpscale(BitmapFile* target) {
 // HIDE DATA
 //
 
-void BitmapToolbox::HideData(BitmapFile* target, BYTE* data, int dataLengh) {
+void BitmapToolbox::HideData(BitmapFile* target, BYTE* data, int dataLengh, const char* extension) {
 
-	HideDataHeader(target, dataLengh);
+	HideDataHeader(target, dataLengh, extension);
 	InternalHideData(target, data, dataLengh, CUSTOMHEADERSIZE);
 }
 
-void BitmapToolbox::HideDataHeader(BitmapFile* target, int dataLengh) {
+void BitmapToolbox::HideDataHeader(BitmapFile* target, int dataLengh, const char* extension) {
 
-	int* convertedData = new int[CHEADER_SIZE];
-	*convertedData = dataLengh;
+	BYTE* convertedData = new BYTE[CHEADER_SIZE];
+	memcpy(convertedData, &dataLengh, 4);
 	//BYTE* convertedData = (BYTE*)dataLengh;
-	InternalHideData(target, (BYTE*)convertedData, CHEADER_SIZE);
+	InternalHideData(target, convertedData, CHEADER_SIZE);
 
-	// just filling with useless value for now
-	InternalHideData(target, (BYTE*)convertedData, CHEADER_EXTENSION, CHEADER_SIZE);
 
-	//free(convertedData);
-	// TODO hide extension as well
+	// wtf delete[]??
+	delete convertedData;
+
+	BYTE* convertedExtension = new BYTE[CHEADER_EXTENSION];
+	memcpy(convertedExtension, extension, CHEADER_EXTENSION);
+	InternalHideData(target, convertedExtension, CHEADER_EXTENSION, CHEADER_SIZE);
+
+	delete convertedExtension;
 }
 
 void BitmapToolbox::InternalHideData(BitmapFile* target, BYTE* data, int dataLengh, int startingPoint) {
@@ -111,29 +116,28 @@ void BitmapToolbox::InternalHideData(BitmapFile* target, BYTE* data, int dataLen
 		BYTE* targ = target->_pixelData + 4 * i;
 		*targ >>= 2;
 		*targ <<= 2;
-		BYTE tmp = (*((BYTE*)(data + i - startingPoint)) & 0b11000000) >> 6;
+		BYTE tmp = (data[i - startingPoint] & 0b11000000) >> 6;
 		*targ |= tmp;
 
 		targ = target->_pixelData + 4 * i + 1;
 		*targ >>= 2;
 		*targ <<= 2;
-		tmp = (*((BYTE*)(data + i - startingPoint)) & 0b00110000) >> 4;
+		tmp = (data[i - startingPoint] & 0b00110000) >> 4;
 		*targ |= tmp;
 
 		targ = target->_pixelData + 4 * i + 2;
 		*targ >>= 2;
 		*targ <<= 2;
-		tmp = (*((BYTE*)(data + i - startingPoint)) & 0b00001100) >> 2;
+		tmp = (data[i - startingPoint] & 0b00001100) >> 2;
 		*targ |= tmp;
 
 		targ = target->_pixelData + 4 * i + 3;
 		*targ >>= 2;
 		*targ <<= 2;
-		BYTE dafuck = *((BYTE*)(data + i - startingPoint));
-		tmp = (dafuck & 0b00000011);
+		tmp = (data[i - startingPoint] & 0b00000011);
 		*targ |= tmp;
 
-		/*std::cout << "WRINTING WITNESS; TRY : " << i << "VALUE : " << std::bitset<8>(*(BYTE*)(data + i - startingPoint)) << std::endl;*/
+		//std::cout << "WRINTING WITNESS; TRY : " << i << "VALUE : " << std::bitset<8>(data[i - startingPoint]) << " || " << std::bitset<8>(*targ) << std::endl;
 	}
 }
 
@@ -142,8 +146,11 @@ void BitmapToolbox::InternalHideData(BitmapFile* target, BYTE* data, int dataLen
 // READING DATA
 //
 
-BYTE* BitmapToolbox::ReadHiddenData(BitmapFile* target) {
+BYTE* BitmapToolbox::ReadHiddenData(BitmapFile* target, BYTE** extension) {
 	CustomHeader header = ReadCustomHeader(target);
+	if (extension != nullptr) {
+		*extension = header.extension;
+	}
 	BYTE* data = InternalReadHiddenData(target, header.size, CUSTOMHEADERSIZE);
 	return data;
 	//lets just treat the data as txt for now
@@ -154,10 +161,14 @@ CustomHeader BitmapToolbox::ReadCustomHeader(BitmapFile* target) {
 	CustomHeader resultHeader;
 
 	BYTE* data = InternalReadHiddenData(target, CHEADER_SIZE);
-	resultHeader.size = (uint64_t)*data;
+	resultHeader.size = *((int*)data);
+
+	delete data;
 
 	data = InternalReadHiddenData(target, CHEADER_EXTENSION, CHEADER_SIZE);
-	/*careful, tmp line*/resultHeader.extension = (uint16_t)*data;
+	resultHeader.extension = data;
+
+	delete data;
 
 	return resultHeader;
 }
@@ -183,6 +194,7 @@ BYTE* BitmapToolbox::InternalReadHiddenData(BitmapFile* target, int dataLengh, i
 		targ = target->_pixelData + 4 * i + 3;
 		tmp = (*targ & 0b00000011);
 		data[i - startingPoint] |= (*targ & 0b00000011);
+
 	}
 	return data;
 }

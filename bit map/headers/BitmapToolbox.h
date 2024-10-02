@@ -1,12 +1,12 @@
 #pragma once
 
-#define CUSTOMHEADERSIZE 10
-#define CHEADER_SIZE 8
-#define CHEADER_EXTENSION 2
+#define CUSTOMHEADERSIZE 16
+#define CHEADER_SIZE 4
+#define CHEADER_EXTENSION 8
 
 struct CustomHeader {
 	uint64_t size;
-	uint16_t extension;
+	BYTE* extension;
 };
 
 class BitmapToolbox{
@@ -18,14 +18,14 @@ public:
 	bool ChangePixelAt(BitmapFile* target, int x, int y, int rgb[3]);
 	void Upscale(BitmapFile* target, int iterations = 1);
 
-	void HideData(BitmapFile* target, BYTE* data, int dataLengh);
-	BYTE* ReadHiddenData(BitmapFile* target);
+	void HideData(BitmapFile* target, BYTE* data, int dataLengh, const char* extension = "txt");
+	BYTE* ReadHiddenData(BitmapFile* target, BYTE** extension = nullptr);
 
 	
 private:
 	void InternalUpscale(BitmapFile* target);
 
-	void HideDataHeader(BitmapFile* target, int dataLengh);
+	void HideDataHeader(BitmapFile* target, int dataLengh, const char* extension);
 	void InternalHideData(BitmapFile* target, BYTE* data, int dataLengh, int startingPoint = 0);
 
 	CustomHeader ReadCustomHeader(BitmapFile* target);
