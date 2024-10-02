@@ -2,6 +2,8 @@
 
 /* Static fields definition */
 WindowCustomParam WindowHandler::_cParam;
+HWND** WindowHandler::_hENCODEarrElements = new HWND*[ENCODE_SCREEN_HWND_COUNT];
+HWND** WindowHandler::_hDECODEarrElements = new HWND*[DECODE_SCREEN_HWND_COUNT];
 
 WindowHandler::WindowHandler(HINSTANCE hInstance) {
     _hInstance = hInstance;
@@ -32,36 +34,8 @@ WindowHandler::WindowHandler(HINSTANCE hInstance) {
 
     /*
        Initializes UI Elements
-       - Creates the Tab Control object
-       - Creates both Tab Items
-       - Inserts both Tab Items
-       - Creates the Static Window object
     */
-    RECT rcApp;
-    GetClientRect(_hWnd, &rcApp);
-    _hTabControl = CreateWindow(WC_TABCONTROL, L"", WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE, _globalPad, _globalPad, rcApp.right, rcApp.bottom, _hWnd, NULL, _hInstance, NULL);
-    if (_hTabControl == NULL) std::cerr << "Creation of the Tab Control failed and is NULL !";
-
-    TCITEM TCIEncode;
-    TCIEncode.mask = TCIF_TEXT;
-    TCIEncode.pszText = _encodeTabName;
-    TCIEncode.cchTextMax = sizeof(_encodeTabName);
-    TCITEM TCIDecode;
-    TCIDecode.mask = TCIF_TEXT;
-    TCIDecode.pszText = _decodeTabName;
-    TCIDecode.cchTextMax = sizeof(_decodeTabName);
-    
-    if (TabCtrl_InsertItem(_hTabControl, ENCODE_TAB_INDEX, &TCIEncode) == -1) {
-        std::cerr << "Insertion of TCIEncode failed ! Destroying Tab Control..." << std::endl;
-        DestroyWindow(_hTabControl);
-    }
-    if (TabCtrl_InsertItem(_hTabControl, DECODE_TAB_INDEX, &TCIDecode) == -1) {
-        std::cerr << "Insertion of TCIDecode failed ! Destroying Tab Control..." << std::endl;
-        DestroyWindow(_hTabControl);
-    }
-
-    _hStatic = CreateWindow(WC_STATIC, L"", WS_CHILD | WS_BORDER | WS_VISIBLE, _globalPad + 50, _globalPad + 50, 100, 100, _hWnd, NULL, _hInstance, NULL);
-    if (_hStatic == NULL) std::cerr << "Creation of the Static Window failed and is NULL !";
+    CreateUIElements();
 }
 
 WindowHandler::~WindowHandler() {
@@ -124,10 +98,9 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
     
     if (_cParam.windowHandler == nullptr || _cParam.bitmapAtHome == nullptr || _cParam.hBmp == nullptr)
     {
-        std::cerr << "It's too soon...\n";
+        std::cout << "It's too soon...\n";
         return E_FAIL;
     }
-
 
     switch (uMsg)
     {
@@ -149,11 +122,22 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
             switch (TabCtrl_GetCurSel(_cParam.windowHandler->_hTabControl))
             {
             case ENCODE_TAB_INDEX:
-                SendMessage(_cParam.windowHandler->_hStatic, WM_SETTEXT, 0, (LPARAM) &(_cParam.windowHandler->_encodeTabName));
+                SendMessage(_cParam.windowHandler->_hStaticAppScreen, WM_SETTEXT, 0, (LPARAM) &(_cParam.windowHandler->_encodeTabName));
+                // Make the UI elements of the Encode screen visible
+                for (int i = (int)_hENCODEarrElements; i < (int)_hENCODEarrElements + ENCODE_SCREEN_HWND_COUNT; ++i)
+                    ShowWindow(*_hENCODEarrElements[i], SW_SHOW);
+
+                // Hides the UI elements of the Decode screen
+                // TODO
                 break;
             case DECODE_TAB_INDEX:
-                
-                SendMessage(_cParam.windowHandler->_hStatic, WM_SETTEXT, 0, (LPARAM) &(_cParam.windowHandler->_decodeTabName));
+                SendMessage(_cParam.windowHandler->_hStaticAppScreen, WM_SETTEXT, 0, (LPARAM) &(_cParam.windowHandler->_decodeTabName));
+                // Make the UI elements of the Decode screen visible
+                // TODO
+
+                // Hides the UI elements of the Encode screen
+                for (int i = (int)_hENCODEarrElements;  i < (int)_hENCODEarrElements + ENCODE_SCREEN_HWND_COUNT;  ++i)
+                    ShowWindow(*_hENCODEarrElements[i], SW_HIDE);
             }
             break;
         }
@@ -216,4 +200,123 @@ HRESULT WindowHandler::ResizeTabControl(LPARAM ARGlParam)
     }
 
     return S_OK;
+}
+
+// Creates every UI elements (should be called on construction)
+void WindowHandler::CreateUIElements()
+{
+    /*
+       Initializes UI Elements : Tabs
+       - Creates the Tab Control object
+       - Creates both Tab Items
+       - Inserts both Tab Items
+       - Creates the Static Window object
+    */
+    RECT rcTemp;    // Used to positon windows created heere relatively to each other
+    GetClientRect(_hWnd, &rcTemp);
+    _hTabControl = CreateWindow(
+        WC_TABCONTROL, L"", WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
+        0, 0, rcTemp.right, rcTemp.bottom,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hTabControl == NULL) std::cerr << "Creation of the Tab Control failed and is NULL !";
+
+    TCITEM TCIEncode;
+    TCIEncode.mask = TCIF_TEXT;
+    TCIEncode.pszText = _encodeTabName;
+    TCIEncode.cchTextMax = sizeof(_encodeTabName);
+    TCITEM TCIDecode;
+    TCIDecode.mask = TCIF_TEXT;
+    TCIDecode.pszText = _decodeTabName;
+    TCIDecode.cchTextMax = sizeof(_decodeTabName);
+
+    if (TabCtrl_InsertItem(_hTabControl, ENCODE_TAB_INDEX, &TCIEncode) == -1) {
+        std::cerr << "Insertion of TCIEncode failed ! Destroying Tab Control..." << std::endl;
+        DestroyWindow(_hTabControl);
+    }
+    if (TabCtrl_InsertItem(_hTabControl, DECODE_TAB_INDEX, &TCIDecode) == -1) {
+        std::cerr << "Insertion of TCIDecode failed ! Destroying Tab Control..." << std::endl;
+        DestroyWindow(_hTabControl);
+    }
+
+    _hStaticAppScreen = CreateWindow(
+        WC_STATIC, L"", STATIC_STYLE,
+        _globalPad, _globalPad + 20, 100, 100,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hStaticAppScreen == NULL) std::cerr << "Creation of the Static Window failed and is NULL !";
+
+    /*
+       Initializes UI Elements : Encoding Screen
+       - Creates the button for the host
+       - Creates the static window for the .bmp preview
+       - Creates the button for the parasite
+       - Creates an edit control to type a message to inject in
+       - Creates a static text more to the right
+       - Creates the static window for the parsited .bmp preview
+       - Creates the button to inject the parasite file
+       - Creates the button to inject the parasite message
+    */
+
+    GetWindowRect(_hStaticAppScreen, &rcTemp);
+    _hENCODEbtnOpenHostBMP = CreateWindow(
+        WC_BUTTON, L"Open a host bitmap image...", BUTTON_STYLE,
+        rcTemp.left, rcTemp.bottom + _globalPad, 30, 5,
+        _hStaticAppScreen, (HMENU)IDB_HOST, _hInstance, NULL);
+    if (_hENCODEbtnOpenHostBMP == NULL) std::cerr << "Creation of the Host Button failed and is NULL !";
+    _hENCODEarrElements[0] = &_hENCODEbtnOpenHostBMP;
+
+    GetWindowRect(_hENCODEbtnOpenHostBMP, &rcTemp);
+    _hENCODEstaticHostPreview = CreateWindow(
+        WC_STATIC, L"", STATIC_STYLE,
+        rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS, BMP_PREVIEW_DIMS,
+        _hStaticAppScreen, NULL, _hInstance, NULL);
+    if (_hENCODEstaticHostPreview == NULL) std::cerr << "Creation of the Static Host Preview failed and is NULL !";
+    _hENCODEarrElements[1] = &_hENCODEstaticHostPreview;
+
+    GetWindowRect(_hENCODEstaticHostPreview, &rcTemp);
+    _hENCODEbtnOpenParasiteFile = CreateWindow(
+        WC_BUTTON, L"Open a file to inject in...", BUTTON_STYLE,
+        rcTemp.left, rcTemp.bottom + _globalPad, 30, 5,
+        _hStaticAppScreen, (HMENU)IDB_PARASITE, _hInstance, NULL);
+    if (_hENCODEbtnOpenParasiteFile == NULL) std::cerr << "Creation of the Parasite Button failed and is NULL !";
+    _hENCODEarrElements[2] = &_hENCODEbtnOpenParasiteFile;
+
+    GetWindowRect(_hENCODEbtnOpenParasiteFile, &rcTemp);
+    _hENCODEeditParasiteMessage = CreateWindow(
+        WC_EDIT, L"If not a file, type your injected message here.", EDIT_STYLE,
+        rcTemp.left, rcTemp.bottom + _globalPad, 60, 40,
+        _hStaticAppScreen, (HMENU)IDE_PARASITE, _hInstance, NULL);
+    if (_hENCODEeditParasiteMessage == NULL) std::cerr << "Creation of the Edit Parasite failed and is NULL !";
+    _hENCODEarrElements[3] = &_hENCODEeditParasiteMessage;
+
+    GetWindowRect(_hENCODEbtnOpenHostBMP, &rcTemp);
+    _hENCODEstaticResultTitle = CreateWindow(
+        WC_STATIC, L"Preview of the result of the injection :", STATIC_STYLE,
+        rcTemp.right + 2 * _globalPad, rcTemp.top, 60, 10,
+        _hStaticAppScreen, NULL, _hInstance, NULL);
+    if (_hENCODEstaticResultTitle == NULL) std::cerr << "Creation of the Static Result Title failed and is NULL !";
+    _hENCODEarrElements[4] = &_hENCODEstaticResultTitle;
+
+    GetWindowRect(_hENCODEstaticResultTitle, &rcTemp);
+    _hENCODEstaticResultPreview = CreateWindow(
+        WC_STATIC, L"", STATIC_STYLE,
+        rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS * 2, BMP_PREVIEW_DIMS * 2,
+        _hStaticAppScreen, NULL, _hInstance, NULL);
+    if (_hENCODEstaticResultPreview == NULL) std::cerr << "Creation of the Static Result Preview failed and is NULL !";
+    _hENCODEarrElements[5] = &_hENCODEstaticResultPreview;
+
+    GetWindowRect(_hENCODEstaticResultPreview, &rcTemp);
+    _hENCODEbtnInjectFile = CreateWindow(
+        WC_BUTTON, L"Inject file", BUTTON_STYLE,
+        rcTemp.left + 10, rcTemp.bottom + 3 * _globalPad, 50, 10,
+        _hStaticAppScreen, (HMENU)IDB_INJECT_FILE, _hInstance, NULL);
+    if (_hENCODEbtnInjectFile == NULL) std::cerr << "Creation of the Injectf File Button failed and is NULL !";
+    _hENCODEarrElements[6] = &_hENCODEbtnInjectFile;
+
+    GetWindowRect(_hENCODEbtnInjectFile, &rcTemp);
+    _hENCODEbtnInjectMessage = CreateWindow(
+        WC_BUTTON, L"Inject message", BUTTON_STYLE,
+        rcTemp.right + 3 * _globalPad, rcTemp.top, 50, 10,
+        _hStaticAppScreen, (HMENU)IDB_INJECT_TEXT, _hInstance, NULL);
+    if (_hENCODEbtnInjectMessage == NULL) std::cerr << "Craation of the Inject Message Button failed and is NULL !";
+    _hENCODEarrElements[7] = &_hENCODEbtnInjectMessage;
 }
