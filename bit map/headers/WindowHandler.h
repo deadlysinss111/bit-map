@@ -3,9 +3,9 @@
 #define ENCODE_TAB_INDEX 0
 #define DECODE_TAB_INDEX 1
 
-#define STATIC_STYLE /* ==> */ WS_CHILD
-#define BUTTON_STYLE /* ==> */ WS_BORDER | WS_CHILD | BS_PUSHBUTTON
-#define EDIT_STYLE   /* ==> */ WS_BORDER | WS_CHILD | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_AUTOVSCROLL
+#define STATIC_STYLE /* ==> */ WS_VISIBLE | WS_BORDER | WS_CHILD
+#define BUTTON_STYLE /* ==> */ WS_VISIBLE | WS_BORDER | WS_CHILD | BS_PUSHBUTTON
+#define EDIT_STYLE   /* ==> */ WS_VISIBLE | WS_BORDER | WS_CHILD | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_AUTOVSCROLL
 
 #define IDB_HOST 0 
 #define IDB_PARASITE 1
@@ -52,9 +52,8 @@ private:
 	   UI Elements : Tabs
 	*/
 	HWND _hTabControl;							// Handle to the Tab Control
-	wchar_t _encodeTabName[50] = L"";			// duh
+	wchar_t _encodeTabName[50] = L"Encode";		// duh
 	wchar_t _decodeTabName[50] = L"Decode";		// duh
-	HWND _hStaticAppScreen;						// Handle to the Static controle (where the displaying takes place)
 
 	// Called if the window gets resized to adapt the tabs as well
 	HRESULT ResizeTabControl(LPARAM ARGlParam);
