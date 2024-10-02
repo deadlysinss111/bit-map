@@ -8,7 +8,7 @@ public:
 
 	void RunWindow();
 
-	HBITMAP CreateBmpHandler(BitmapAtHome* bmp);
+	HBITMAP CreateBmpHandler(BitmapFile* bmp);
 	void SetCustomParam(WindowCustomParam* param);
 	void CallRedraw();
 
@@ -22,6 +22,6 @@ private:
 };
 
 struct WindowCustomParam {
-	BitmapAtHome* bmp;
+	BitmapFile* bmp;
 	HBITMAP* hBmp;
 };

@@ -130,14 +130,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\CColor.cpp" />
+    <ClCompile Include="src\BitmapFile.cpp" />
+    <ClCompile Include="src\RawFile.cpp" />
     <ClCompile Include="src\InfectedBitmap.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\BitmapAtHome.cpp" />
+    <ClCompile Include="src\BitmapToolbox.cpp" />
     <ClCompile Include="src\WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="headers\CColor.h" />
+    <ClInclude Include="headers\BitmapFile.h" />
+    <ClInclude Include="headers\RawFile.h" />
     <ClInclude Include="headers\pch.h" />
-    <ClInclude Include="headers\BitmapAtHome.h" />
+    <ClInclude Include="headers\BitmapToolbox.h" />
     <ClInclude Include="headers\WindowHandler.h" />
     <ClInclude Include="headers\InfectedBitmap.h" />
   </ItemGroup>

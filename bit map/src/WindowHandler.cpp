@@ -87,10 +87,10 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
     }
 }
 
-HBITMAP WindowHandler::CreateBmpHandler(BitmapAtHome* bmp) {
+HBITMAP WindowHandler::CreateBmpHandler(BitmapFile* bmp) {
     // Set that in it's own function rather than directly in the WinProc for performences reasons
     HDC hdc = GetDC(_hWnd);
-    return  CreateDIBitmap(hdc, bmp->_infoHeader, CBM_INIT, bmp->_colorTable, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
+    return  CreateDIBitmap(hdc, bmp->_infoHeader, CBM_INIT, bmp->_buffer, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
 }
 
 void WindowHandler::SetCustomParam(WindowCustomParam* param) {

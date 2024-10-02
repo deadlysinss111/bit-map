@@ -9,15 +9,19 @@
 #include <Windows.h>
 #include <wingdi.h>
 
-class BitmapAtHome;
-class InfectedBitmap;
+class BitmapToolbox;
 class WindowHandler;
+class RawFile;
+class BitmapFile;
+class CColor;
 
 struct WindowCustomParam;
 struct CustomHeader;
 
 
 
-#include "BitmapAtHome.h"
-#include "InfectedBitmap.h"
+#include "BitmapToolbox.h"
 #include "WindowHandler.h"
+#include "RawFile.h"
+#include "BitmapFile.h"
+#include "CColor.h"

@@ -12,21 +12,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	WindowHandler handler(hInstance);
 	
 
-	BitmapAtHome bmp;
+	BitmapFile bmp;
 
 	bmp.LoadFile("red.bmp");
 	//bmp.Upscale(2);
 
-	BYTE* ch = new BYTE;
-	InfectedBitmap* test = InfectedBitmap::InfectBmp(&bmp);
-
-
-
-
+	BitmapToolbox toolbox;
 
 	const char* str = "test";
 	BYTE* bStr = (BYTE*)str;
-	test->HideData(bStr, 5);
+	toolbox.HideData(&bmp, bStr, 5);
 
 
 
@@ -38,14 +33,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	//bmp.SaveAsFile("textFile.bmp");
 
 	WindowCustomParam param;
-	param.bmp = test;
-	HBITMAP hBmp = handler.CreateBmpHandler(test);
+	param.bmp = &bmp;
+	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);
 	param.hBmp = &hBmp;
 	handler.SetCustomParam(&param);
 	handler.CallRedraw();
 
 
-	BYTE* result = test->ReadHiddenData();
+	BYTE* result = toolbox.ReadHiddenData(&bmp);
 	std::cout << "result is : "<< (char*)result << std::endl;
 
 	handler.RunWindow();
