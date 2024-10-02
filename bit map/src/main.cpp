@@ -23,7 +23,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 	// Partial setup of Window Handler's custom parameter
-	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);	// TODO: Creation of the HBITMPA should be in the WindowHandler class
+	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);	// TODO: Creation of the HBITMAP should be in the WindowHandler class
 	handler._cParam.bitmapAtHome = &bmp;
 	handler._cParam.hBmp = &hBmp;
 

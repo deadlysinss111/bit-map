@@ -256,6 +256,7 @@ void WindowHandler::CreateUIElements()
        - Creates the button to inject the parasite message
     */
     
+    GetClientRect(_hWnd, &rcTemp);
     TabCtrl_AdjustRect(_hTabControl, FALSE, &rcTemp);
     _hENCODEbtnOpenHostBMP = CreateWindow(
         WC_BUTTON, L"Open a host bitmap image...", BUTTON_STYLE,
@@ -266,58 +267,98 @@ void WindowHandler::CreateUIElements()
     _hENCODEarrElements[0] = &_hENCODEbtnOpenHostBMP;
 
     GetWindowRect(_hENCODEbtnOpenHostBMP, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
     _hENCODEstaticHostPreview = CreateWindow(
-        WC_STATIC, L"", STATIC_STYLE,
+        WC_STATIC, L"", STATIC_FRAME_STYLE,
         rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS, BMP_PREVIEW_DIMS,
         _hWnd, NULL, _hInstance, NULL);
     if (_hENCODEstaticHostPreview == NULL) std::cerr << "Creation of the Static Host Preview failed and is NULL !";
     _hENCODEarrElements[1] = &_hENCODEstaticHostPreview;
 
     GetWindowRect(_hENCODEstaticHostPreview, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
     _hENCODEbtnOpenParasiteFile = CreateWindow(
         WC_BUTTON, L"Open a file to inject in...", BUTTON_STYLE,
-        rcTemp.left, rcTemp.bottom + _globalPad, 30, 5,
+        rcTemp.left, rcTemp.bottom + _strongPad, 200, 20,
         _hWnd, (HMENU)IDB_PARASITE, _hInstance, NULL);
     if (_hENCODEbtnOpenParasiteFile == NULL) std::cerr << "Creation of the Parasite Button failed and is NULL !";
     _hENCODEarrElements[2] = &_hENCODEbtnOpenParasiteFile;
 
     GetWindowRect(_hENCODEbtnOpenParasiteFile, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
     _hENCODEeditParasiteMessage = CreateWindow(
         WC_EDIT, L"If not a file, type your injected message here.", EDIT_STYLE,
-        rcTemp.left, rcTemp.bottom + _globalPad, 60, 40,
+        rcTemp.left - _smolPad, rcTemp.bottom + _globalPad, 200 + _smolPad, 100,
         _hWnd, (HMENU)IDE_PARASITE, _hInstance, NULL);
     if (_hENCODEeditParasiteMessage == NULL) std::cerr << "Creation of the Edit Parasite failed and is NULL !";
     _hENCODEarrElements[3] = &_hENCODEeditParasiteMessage;
 
     GetWindowRect(_hENCODEbtnOpenHostBMP, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
     _hENCODEstaticResultTitle = CreateWindow(
-        WC_STATIC, L"Preview of the result of the injection :", STATIC_STYLE,
-        rcTemp.right + 2 * _globalPad, rcTemp.top, 60, 10,
+        WC_STATIC, L"Preview of the result of the injection :", STATIC_TEXT_STYLE,
+        rcTemp.right + _strongPad, rcTemp.top, 400, 15,
         _hWnd, NULL, _hInstance, NULL);
     if (_hENCODEstaticResultTitle == NULL) std::cerr << "Creation of the Static Result Title failed and is NULL !";
     _hENCODEarrElements[4] = &_hENCODEstaticResultTitle;
 
     GetWindowRect(_hENCODEstaticResultTitle, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
     _hENCODEstaticResultPreview = CreateWindow(
-        WC_STATIC, L"", STATIC_STYLE,
+        WC_STATIC, L"", STATIC_FRAME_STYLE,
         rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS * 2, BMP_PREVIEW_DIMS * 2,
         _hWnd, NULL, _hInstance, NULL);
     if (_hENCODEstaticResultPreview == NULL) std::cerr << "Creation of the Static Result Preview failed and is NULL !";
     _hENCODEarrElements[5] = &_hENCODEstaticResultPreview;
 
     GetWindowRect(_hENCODEstaticResultPreview, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
     _hENCODEbtnInjectFile = CreateWindow(
         WC_BUTTON, L"Inject file", BUTTON_STYLE,
-        rcTemp.left + 10, rcTemp.bottom + 3 * _globalPad, 50, 10,
+        rcTemp.left + 2 * _strongPad, rcTemp.bottom + _strongPad, 130, 20,
         _hWnd, (HMENU)IDB_INJECT_FILE, _hInstance, NULL);
     if (_hENCODEbtnInjectFile == NULL) std::cerr << "Creation of the Injectf File Button failed and is NULL !";
     _hENCODEarrElements[6] = &_hENCODEbtnInjectFile;
 
-    GetWindowRect(_hENCODEbtnInjectFile, &rcTemp);
     _hENCODEbtnInjectMessage = CreateWindow(
         WC_BUTTON, L"Inject message", BUTTON_STYLE,
-        rcTemp.right + 3 * _globalPad, rcTemp.top, 50, 10,
+        rcTemp.right - 130 - 2 * _strongPad, rcTemp.bottom + _strongPad, 130, 20,
         _hWnd, (HMENU)IDB_INJECT_TEXT, _hInstance, NULL);
-    if (_hENCODEbtnInjectMessage == NULL) std::cerr << "Craation of the Inject Message Button failed and is NULL !";
+    if (_hENCODEbtnInjectMessage == NULL) std::cerr << "Creation of the Inject Message Button failed and is NULL !";
     _hENCODEarrElements[7] = &_hENCODEbtnInjectMessage;
+
+    /*
+       Initializes UI Elements : Deconding Screen
+       - Creates the button for the target
+       - Creates the static window for the .bmp preview
+       - Creates the static text to know where errors would go
+       - Creates the edit (unwrittable) to display the operation status in
+       - Creates a static text more to the right
+       - Creates the edit (unwrittable) where the decoded message will go
+       - Creates the button to extract the message
+    */
+
+    GetClientRect(_hWnd, &rcTemp);
+    TabCtrl_AdjustRect(_hTabControl, FALSE, &rcTemp);
+    _hDECODEbtnOpenInfectedBMP = CreateWindow(
+        WC_BUTTON, L"Open an infected bitmap image...", BUTTON_STYLE,
+        rcTemp.left + _globalPad, rcTemp.bottom + _globalPad, 200, 20,
+        _hWnd, (HMENU)IDB_INFECTED, _hInstance, NULL);
+    if (_hDECODEbtnOpenInfectedBMP == NULL) std::cerr << "Creation of the Open Infected Button failed and is NULL !";
+
+    GetWindowRect(_hDECODEbtnOpenInfectedBMP, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    _hDECODEstaticInfectedPreview = CreateWindow(
+        WC_STATIC, L"", STATIC_FRAME_STYLE,
+        rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS, BMP_PREVIEW_DIMS,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hDECODEstaticInfectedPreview == NULL) std::cerr << "Creation of the Static Infected Preview failed and is NULL !";
+
+    GetWindowRect(_hDECODEstaticInfectedPreview, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    _hDECODEstaticOperationResult = CreateWindow(
+        WC_STATIC, L"Extraction result :", STATIC_TEXT_STYLE,
+        rcTemp.left, rcTemp.bottom + 5 * _strongPad, 200, 15,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hDECODEstaticOperationResult == NULL) std::cerr << "Creation of the Extraction Result Title failed and is NULL !";
 }
