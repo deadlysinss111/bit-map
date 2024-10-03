@@ -29,7 +29,7 @@ public:
 	bool ChangePixelAt(CImage* target, int x, int y, int rgb[3]);
 	void Upscale(CImage* target, int iterations = 1);
 
-	void HideData(CImage* target, BYTE* data, int dataLengh, const char* extension = "txt");
+	bool HideData(CImage* target, BYTE* data, int dataLengh, const char* extension = "txt");
 	BYTE* ReadHiddenData(CImage* target, CustomHeader* headerAddr = nullptr);
 
 

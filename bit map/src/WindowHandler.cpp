@@ -142,13 +142,13 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
                 BitmapFile* bmp = new BitmapFile;
                 bmp->LoadFile(path);
-                CImageToolbox toolbox;
+                CImageToolbox tb;
 
                 HBITMAP* hBmp = new HBITMAP;
                 *hBmp = CreateDIBitmap(_cParam.windowHandler->_hDc, bmp->_infoHeader, CBM_INIT, bmp->_pixelData, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
 
                 //_cParam.encodingSanePreview = toolbox.BitmapToCImage(&bmp);
-                _cParam.encodingSanePreview = bmp;
+                _cParam.encodingSanePreview = tb.BitmapToCImage(bmp);
                 _cParam.hBmp = hBmp;
             }
                 break;
@@ -163,12 +163,15 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
                 GetWindowText(_cParam.windowHandler->_hENCODEeditParasiteMessage, wideTxt, MAX_PATH);
                 int len = wcstombs(txt, wideTxt, MAX_PATH);
 
-                BitmapToolbox toolbox;
-                if (false == toolbox.HideData(_cParam.encodingSanePreview, (BYTE*)txt, wcslen(wideTxt)+1)) {
-                    break;
-                }
+                CImageToolbox tb;
+                bool isUpscaled = tb.HideData(_cParam.encodingSanePreview, (BYTE*)txt, wcslen(wideTxt) + 1);
+
                 
-                _cParam.encodingSanePreview->SaveAsFile("InfectedBitmap.bmp");
+                tb.CImageToBitmap(_cParam.encodingSanePreview)->SaveAsFile("InfectedBitmap.bmp");
+
+                LPCWSTR msg = L"File successfully hidden.\nThe corrupted bitmap will be name 'infected.bmp'.";
+                LPCWSTR msgWithResize = L"File successfully hidden.\nThe corrupted bitmap will be name 'infected.bmp'.\nThe bitmap were too short to contain the string, it has been upscaled.";
+                MessageBox(NULL, isUpscaled ? msgWithResize : msg, L"Success", MB_OK | MB_ICONINFORMATION);
             }
                 break;
 
@@ -200,15 +203,16 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
                 RawFile file;
                 file.LoadFile(path);
                     
-                BitmapToolbox toolbox;
+                CImageToolbox tb;
 
                 CustomHeader header;
-                if (false == toolbox.HideData(_cParam.encodingSanePreview, file._buffer, file._size, path + ofn.nFileExtension)) {
-                    break;
-                }
+                bool isUpscaled = tb.HideData(_cParam.encodingSanePreview, file._buffer, file._size, path + ofn.nFileExtension);
                 
+                tb.CImageToBitmap(_cParam.encodingSanePreview)->SaveAsFile("InfectedBitmap.bmp");
 
-                _cParam.encodingSanePreview->SaveAsFile("InfectedBitmap.bmp");
+                LPCWSTR msg = L"File successfully hidden.\nThe corrupted bitmap will be name 'infected.bmp'.";
+                LPCWSTR msgWithResize = L"File successfully hidden.\nThe corrupted bitmap will be name 'infected.bmp'.\nThe bitmap were too short to contain the file, it has been upscaled.";
+                MessageBox(NULL, isUpscaled? msgWithResize : msg, L"Success", MB_OK | MB_ICONINFORMATION);
             }
                 break;
 
@@ -238,7 +242,9 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
                 RawFile* file = new RawFile(); /**/
                 file->LoadFile(path);
 
-                _cParam.decodingPreview = file;
+                CImageToolbox tb;
+
+                _cParam.decodingPreview = tb.BitmapToCImage(file);
             }
                 break;
 
@@ -246,10 +252,10 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
             {
                 if (_cParam.decodingPreview == nullptr) break;
 
-                BitmapToolbox toolbox;
+                CImageToolbox tb;
 
                 CustomHeader header;
-                BYTE* result = toolbox.ReadHiddenData(_cParam.decodingPreview, &header);
+                BYTE* result = tb.ReadHiddenData(_cParam.decodingPreview, &header);
 
                 int wideLength = MultiByteToWideChar(CP_ACP, 0, (char*)result, header.size, NULL, 0);
                 LPWSTR wideString = new WCHAR[wideLength + 1];
@@ -265,6 +271,8 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
                 fopen_s(&target, appended, "wb");
                 fwrite(result, 1, header.size, target);
                 fclose(target);
+
+                MessageBox(NULL, L"Data has been extracted.\nThe file that has been exctracted was saved as result.[extension]", L"Success", MB_OK | MB_ICONINFORMATION);
             }
                 break;
 
@@ -341,15 +349,15 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
         BeginPaint(hWnd, &ps);
 
         //if (_cParam.hBmp != nullptr) {
-        //    HDC hDC = BeginPaint(_cParam.windowHandler->_hENCODEbtnOpenHostBMP, &ps);
+        //    HDC hDC = BeginPaint(hWnd, &ps);
         //    HDC memDC = CreateCompatibleDC(hDC);
         //    SelectObject(memDC, *(_cParam.hBmp));
 
         //    //StretchBlt(hDC, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
-        //    BitBlt(hDC, 100, 100, _cParam.img->_width, _cParam.img->_height, memDC, 0, 0, SRCCOPY);
+        //    //BitBlt(hDC, 10, 10, _cParam.img->_width, _cParam.img->_height, memDC, 0, 0, SRCCOPY);
 
         //    //RedrawWindow(_cParam.windowHandler->_hENCODEbtnOpenHostBMP, 0, 0, RDW_INTERNALPAINT | RDW_INVALIDATE);
-        //    SetWindowPos(_cParam.windowHandler->_hENCODEbtnOpenHostBMP, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        //    //SetWindowPos(_cParam.windowHandler->_hENCODEbtnOpenHostBMP, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
         //}
         
 
@@ -376,6 +384,12 @@ HBITMAP WindowHandler::CreateBmpHandler(RawFile* bmp) {
     BYTE* pixelData = bmp->_buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
     // Set that in it's own function rather than directly in the WinProc for performences reasons
     return  CreateDIBitmap(_hDc, infoHeader, CBM_INIT, pixelData, (BITMAPINFO*)infoHeader, DIB_RGB_COLORS);
+}
+
+HBITMAP WindowHandler::CreateBmpHandler(CImage* bmp) {
+    CImageToolbox tb;
+    RawFile* rawFileBmp = tb.CImageToBitmap(bmp);
+    return CreateBmpHandler(rawFileBmp);
 }
 
 void WindowHandler::CallRedraw() {

@@ -35,6 +35,7 @@ public:
 
 	HBITMAP CreateBmpHandler(BitmapFile* bmp);
 	HBITMAP CreateBmpHandler(RawFile* bmp);
+	HBITMAP CreateBmpHandler(CImage* bmp);
 	void CallRedraw();
 
 	// Public since we need main.cpp to fill some of its fields
@@ -105,8 +106,7 @@ private:
 struct WindowCustomParam {
 	WindowHandler* windowHandler;
 	HBITMAP* hBmp;
-	CImage* img;
-	RawFile* encodingSanePreview;
-	RawFile* encodingInfectedPreview;
-	RawFile* decodingPreview;
+	CImage* encodingSanePreview;
+	CImage* encodingInfectedPreview;
+	CImage* decodingPreview;
 };

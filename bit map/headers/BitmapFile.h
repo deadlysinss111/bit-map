@@ -3,6 +3,7 @@
 class BitmapFile : public RawFile {
 public:
 	BitmapFile();
+	BitmapFile(RawFile* file);
 	~BitmapFile();
 
 	void LoadFile(const char* addr);
