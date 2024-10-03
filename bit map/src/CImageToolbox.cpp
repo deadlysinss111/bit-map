@@ -109,14 +109,13 @@ RawFile* CImageToolbox::CImageToBitmap(CImage* img) {
 
 	BITMAPINFOHEADER infoHeader;
 
-	infoHeader.biSize = img->_bitsPerPixel * img->_bufLengh;
+	infoHeader.biSize = sizeof(BITMAPINFOHEADER);
 	infoHeader.biWidth = img->_width;
 	infoHeader.biHeight = img->_height;
 	infoHeader.biPlanes = 1;
 	infoHeader.biBitCount = img->_bitsPerPixel;
 	infoHeader.biCompression = BI_RGB;
-	// may be a problem from there
-	infoHeader.biSizeImage = 0;
+	infoHeader.biSizeImage = (img->_bitsPerPixel/8) * img->_bufLengh;
 	infoHeader.biXPelsPerMeter = 0;
 	infoHeader.biYPelsPerMeter = 0;
 	infoHeader.biClrUsed = 0;
@@ -131,6 +130,8 @@ RawFile* CImageToolbox::CImageToBitmap(CImage* img) {
 	file->_buffer = buffer;
 	file->_size = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (img->_bitsPerPixel / 8) * img->_bufLengh;
 
+	SwapRnB(buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER), infoHeader.biSizeImage);
+
 	return file;
 }
 
@@ -140,10 +141,16 @@ RawFile* CImageToolbox::CImageToBitmap(CImage* img) {
 // HIDE DATA
 //
 
-void CImageToolbox::HideData(CImage* target, BYTE* data, int dataLengh, const char* extension) {
-
+bool CImageToolbox::HideData(CImage* target, BYTE* data, int dataLengh, const char* extension) {
+	bool isUpscaled = false;
+	CImageToolbox tb;
+	while (target->_bufLengh <= dataLengh) {
+		isUpscaled = true;
+		tb.Upscale(target);
+	}
 	HideDataHeader(target, dataLengh, extension);
 	InternalHideData(target, data, dataLengh, CUSTOMHEADERSIZE);
+	return isUpscaled;
 }
 
 void CImageToolbox::HideDataHeader(CImage* target, int dataLengh, const char* extension) {

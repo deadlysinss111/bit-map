@@ -6,8 +6,19 @@ BitmapFile::BitmapFile() {
 	_pixelData = nullptr;
 }
 
-BitmapFile::~BitmapFile() {
+BitmapFile::BitmapFile(RawFile* file) {
+	_buffer = new BYTE[file->_size];
+	memcpy(_buffer, file->_buffer, file->_size);
+	_fileHeader = (BITMAPFILEHEADER*)_buffer;
+	_infoHeader = (BITMAPINFOHEADER*)(_buffer + sizeof(BITMAPFILEHEADER));
+	memcpy(_infoHeader, file->_buffer + sizeof(BITMAPFILEHEADER), sizeof(BITMAPINFOHEADER));
+	_pixelData = _buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	_size = file->_size;
+}
 
+BitmapFile::~BitmapFile() {
+	/*delete _fileHeader;
+	delete _infoHeader;*/
 }
 
 void BitmapFile::LoadFile(const char* addr)  {
