@@ -22,9 +22,9 @@
 #define DECODE_SCREEN_HWND_COUNT 7
 
 struct WindowCustomParam {
-	WindowHandler* windowHandler;
-	BitmapAtHome* bitmapAtHome;
-	HBITMAP* hBmp;
+	WindowHandler* windowHandler;	// Used to call functions from this class while message pumping
+	HBITMAP* hBmp;					// USAGE UNKNOW TODO
+	BitmapFile* bitmapFile;			// Used to paint bitmaps
 };
 
 class WindowHandler
@@ -93,7 +93,5 @@ private:
 	short _globalPad = 5;	// "Default", got-to padding
 	short _strongPad = 13;	// More pronounced padding
 
-struct WindowCustomParam {
-	BitmapFile* bmp;
-	HBITMAP* hBmp;
-};
+	void CreateUIElements();
+}

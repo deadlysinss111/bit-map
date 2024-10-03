@@ -96,7 +96,7 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
     //    return E_FAIL;
     //}
     
-    if (_cParam.windowHandler == nullptr || _cParam.bitmapAtHome == nullptr || _cParam.hBmp == nullptr)
+    if (_cParam.windowHandler == nullptr || _cParam.hBmp == nullptr)
     {
         std::cout << "It's too soon...\n";
         return E_FAIL;
@@ -163,17 +163,7 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
             SelectObject(memDC, *(_cParam.hBmp));
 
             //StretchBlt(hDC, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
-            BitBlt(hDC, 10, 10, _cParam.bitmapAtHome->_infoHeader->biWidth, _cParam.bitmapAtHome->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
-            
-            //PAINTSTRUCT ps;
-            //HDC hdc = BeginPaint(hWnd, &ps);
-
-            //HBITMAP hBmp = *customParam->hBmp;
-            //HDC memDC = CreateCompatibleDC(hdc);
-            //SelectObject(memDC, hBmp);
-
-            ////StretchBlt(hdc, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
-            //BitBlt(hdc, 10, 10, customParam->bitmapAtHome->_infoHeader->biWidth, customParam->bitmapAtHome->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
+            //BitBlt(hDC, 10, 10, _cParam.bitmapAtHome->_infoHeader->biWidth, _cParam.bitmapAtHome->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
         }
         break;
     case WM_DESTROY:
@@ -187,7 +177,7 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
 HBITMAP WindowHandler::CreateBmpHandler(BitmapFile* bmp) {
     // Set that in it's own function rather than directly in the WinProc for performences reasons
-    return  CreateDIBitmap(_hDc, bmp->_infoHeader, CBM_INIT, bmp->_colorTable, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
+    return  CreateDIBitmap(_hDc, bmp->_infoHeader, CBM_INIT, bmp->_pixelData, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
 }
 
 void WindowHandler::SetCustomParam(WindowCustomParam* param) {
