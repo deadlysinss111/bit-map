@@ -8,6 +8,7 @@
 #include <fstream>
 #include <string>
 #include <bitset>
+#include <cassert>
 
 #include <Windows.h>
 #include <wingdi.h>

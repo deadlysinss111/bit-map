@@ -156,13 +156,22 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
         // Need to define a scope otherwise compiler isn't happy with variable definition
     {
         PAINTSTRUCT ps;
-        HDC hDC = BeginPaint(hWnd, &ps);
+        BeginPaint(hWnd, &ps);
 
-        HDC memDC = CreateCompatibleDC(hDC);
-        SelectObject(memDC, *(_cParam.hBmp));
+        //if (_cParam.hBmp != nullptr) {
+        //    HDC hDC = BeginPaint(_cParam.windowHandler->_hENCODEbtnOpenHostBMP, &ps);
+        //    HDC memDC = CreateCompatibleDC(hDC);
+        //    SelectObject(memDC, *(_cParam.hBmp));
 
-        //StretchBlt(hDC, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
-        //BitBlt(hDC, 10, 10, _cParam.bitmapFile->_infoHeader->biWidth, _cParam.bitmapFile->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
+        //    //StretchBlt(hDC, 10, 10, 40, 40, memDC, 0, 0, customParam->bmp->_infoHeader->biHeight, customParam->bmp->_infoHeader->biWidth, SRCCOPY);
+        //    BitBlt(hDC, 100, 100, _cParam.img->_width, _cParam.img->_height, memDC, 0, 0, SRCCOPY);
+
+        //    //RedrawWindow(_cParam.windowHandler->_hENCODEbtnOpenHostBMP, 0, 0, RDW_INTERNALPAINT | RDW_INVALIDATE);
+        //    SetWindowPos(_cParam.windowHandler->_hENCODEbtnOpenHostBMP, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        //}
+        
+
+        
     }
     break;
     case WM_DESTROY:
@@ -177,6 +186,13 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 HBITMAP WindowHandler::CreateBmpHandler(BitmapFile* bmp) {
     // Set that in it's own function rather than directly in the WinProc for performences reasons
     return  CreateDIBitmap(_hDc, bmp->_infoHeader, CBM_INIT, bmp->_pixelData, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
+}
+
+HBITMAP WindowHandler::CreateBmpHandler(RawFile* bmp) {
+    BITMAPINFOHEADER* infoHeader = (BITMAPINFOHEADER*)(bmp->_buffer + sizeof(BITMAPFILEHEADER));
+    BYTE* pixelData = bmp->_buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+    // Set that in it's own function rather than directly in the WinProc for performences reasons
+    return  CreateDIBitmap(_hDc, infoHeader, CBM_INIT, pixelData, (BITMAPINFO*)infoHeader, DIB_RGB_COLORS);
 }
 
 void WindowHandler::CallRedraw() {
