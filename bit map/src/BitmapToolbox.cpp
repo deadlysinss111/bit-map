@@ -46,9 +46,7 @@ void BitmapToolbox::InternalUpscale(BitmapFile* target) {
 	BYTE* addr = new BYTE[newRowSize * newHeight + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)];
 
 	memcpy(addr, target->_buffer, sizeof(BITMAPFILEHEADER));
-	memcpy(target->_fileHeader, addr, sizeof(BITMAPFILEHEADER));
 	memcpy(addr + sizeof(BITMAPFILEHEADER), target->_buffer + sizeof(BITMAPFILEHEADER), sizeof(BITMAPINFOHEADER));
-	memcpy(target->_infoHeader, target->_buffer + sizeof(BITMAPFILEHEADER), sizeof(BITMAPINFOHEADER));
 	BYTE* colorAddr = addr + target->_fileHeader->bfOffBits;
 
 	for (int j = 0; j < target->_infoHeader->biHeight; j++) {
@@ -72,12 +70,15 @@ void BitmapToolbox::InternalUpscale(BitmapFile* target) {
 		}
 	}
 
+	delete target->_buffer;
+	target->_buffer = addr;
+	target->_fileHeader = (BITMAPFILEHEADER*)addr;
+	target->_infoHeader = (BITMAPINFOHEADER*)(addr + sizeof(BITMAPFILEHEADER));
 	target->_infoHeader->biWidth = newWidth;
 	target->_infoHeader->biHeight = newHeight;
 	target->_infoHeader->biSizeImage = newRowSize * newHeight;
+	target->_infoHeader->biSize= newRowSize * newHeight;
 	target->_size = newRowSize * newHeight + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-	delete target->_buffer;
-	target->_buffer = addr;
 	target->_pixelData = colorAddr;
 	target->_fileHeader->bfSize = newRowSize * newHeight + sizeof(BITMAPINFOHEADER);
 }

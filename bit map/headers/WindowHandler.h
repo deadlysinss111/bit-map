@@ -31,6 +31,7 @@ public:
 	void RunWindow();
 
 	HBITMAP CreateBmpHandler(BitmapFile* bmp);
+	HBITMAP CreateBmpHandler(RawFile* bmp);
 	void CallRedraw();
 
 	// Public since we need main.cpp to fill some of its fields
@@ -101,4 +102,5 @@ private:
 struct WindowCustomParam {
 	WindowHandler* windowHandler;
 	HBITMAP* hBmp;
+	CImage* img;
 };

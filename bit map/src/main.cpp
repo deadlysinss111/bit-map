@@ -9,27 +9,37 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	freopen_s(&consoleOut, "CONOUT$", "w", stderr);
 
 
+	CImageToolbox tool;
+	BitmapToolbox toolbox;
+
 	WindowHandler handler(hInstance);
 	BitmapFile bmp;
+	bmp.LoadFile("red.bmp");
+	CImage* img = tool.BitmapToCImage(&bmp);
+	//tool.Upscale(img, 1);
+	//bmp = *(tool.CImageToBitmap(img));
+	//toolbox.Upscale(&bmp);
+
+	handler._cParam.img = img;
+
+	//bmp.SaveAsFile("gugugu.bmp");
 
 	// Bêtise time
-	bmp.LoadFile("long.bmp");
 	//bmp.Upscale(2);
 
-	std::cout << bmp._infoHeader->biXPelsPerMeter << " || " << bmp._infoHeader->biYPelsPerMeter << std::endl;
+	//std::cout << bmp._infoHeader->biXPelsPerMeter << " || " << bmp._infoHeader->biYPelsPerMeter << std::endl;
 
-	BitmapToolbox toolbox;
 
 	RawFile test;
 	test.LoadFile("ff.png");
 
-	toolbox.HideData(&bmp, test._buffer, test._size, "png");
+	//toolbox.HideData(&bmp, test._buffer, test._size, "png");
 	
 
 
-	handler.CallRedraw();
+	
 
-	CustomHeader header;
+	/*CustomHeader header;
 	BYTE* result = toolbox.ReadHiddenData(&bmp, &header);
 
 
@@ -40,7 +50,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	FILE* target;
 	fopen_s(&target, appended, "wb");
 	fwrite(result, 1, header.size, target);
-	fclose(target);
+	fclose(target);*/
 
 	//delete result;
 
@@ -49,6 +59,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	// Partial setup of Window Handler's custom parameter
 	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);	// TODO: Creation of the HBITMAP should be in the WindowHandler class
 	handler._cParam.hBmp = &hBmp;
+
+	handler.CallRedraw();
 
 	handler.RunWindow();
 }

@@ -5,7 +5,7 @@ CImage::CImage(BYTE* buffer, int width, int height, int bitsPerPixel) {
 	_width = width;
 	_height = height;
 	_bitsPerPixel = bitsPerPixel;
-	_bufLengh = width * height;
+	_bufLengh = width * height ;
 }
 
 CImage::~CImage() {

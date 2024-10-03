@@ -54,6 +54,8 @@ void CImageToolbox::InternalUpscale(CImage* target) {
 			// We are looking for the base destination in our copy bmp
 			int destIndex = (i * 2 + j * 2 * newWidth) * bytesPerPixel;
 
+			assert(destIndex < newRowSize * newHeight);
+
 			// For each of the r, g and b value
 			for (int b = 0; b < bytesPerPixel; b++) {
 				// We copy it into a square of 4 pixels (the first one being the base destination we searched for just before) into our copy bmp
@@ -67,8 +69,8 @@ void CImageToolbox::InternalUpscale(CImage* target) {
 
 	target->_width = newWidth;
 	target->_height = newHeight;
-	target->_bufLengh = newRowSize * newHeight;
-	delete target->_colorBuffer;
+	target->_bufLengh = newWidth * newHeight;
+	//delete target->_colorBuffer; //!\\ //
 	target->_colorBuffer = addr;
 }
 
@@ -82,10 +84,10 @@ CImage* CImageToolbox::BitmapToCImage(RawFile* file) {
 	BITMAPINFOHEADER infoHeader;
 	memcpy(&infoHeader, file->_buffer + sizeof(BITMAPFILEHEADER), sizeof(BITMAPINFOHEADER));
 
-	BYTE* buf = new BYTE[infoHeader.biSize];
+	BYTE* buf = new BYTE[infoHeader.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)];
 	memcpy(buf, file->_buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER), infoHeader.biSizeImage);
 
-	SwapRnB(buf, infoHeader.biSize);
+	SwapRnB(buf, infoHeader.biSizeImage);
 
 	CImage* image = new CImage(buf, infoHeader.biWidth, infoHeader.biHeight, infoHeader.biBitCount);
 
@@ -120,7 +122,7 @@ RawFile* CImageToolbox::CImageToBitmap(CImage* img) {
 	infoHeader.biClrUsed = 0;
 	infoHeader.biClrImportant = 0;
 
-	BYTE* buffer = new BYTE[sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (img->_bitsPerPixel/8) * img->_bufLengh];
+	BYTE* buffer = new BYTE[sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + (img->_bitsPerPixel / 8) * img->_bufLengh];
 	memcpy(buffer, &fileHeader, sizeof(BITMAPFILEHEADER));
 	memcpy(buffer + sizeof(BITMAPFILEHEADER), &infoHeader, sizeof(BITMAPINFOHEADER));
 	memcpy(buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER), img->_colorBuffer, (img->_bitsPerPixel / 8) * img->_bufLengh);

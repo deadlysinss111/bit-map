@@ -10,6 +10,7 @@
 // For printing stuff
 #include <string>
 #include <bitset>
+#include <cassert>
 
 #include <Windows.h>
 #include <wingdi.h>
