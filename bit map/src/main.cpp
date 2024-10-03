@@ -1,14 +1,15 @@
 #include "pch.h"
 
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
-
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+{
+	// Prepares a console because prints are pog
 	AllocConsole();
 	FILE* consoleOut;
 	freopen_s(&consoleOut, "CONOUT$", "w", stdout);
 	freopen_s(&consoleOut, "CONOUT$", "w", stderr);
 
-
+	// Instantiate classes
 	WindowHandler handler(hInstance);
 	
 
@@ -28,11 +29,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	toolbox.HideData(&bmp, test._buffer, test._size, "png");
 
-	WindowCustomParam param;
-	param.bmp = &bmp;
-	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);
-	param.hBmp = &hBmp;
-	handler.SetCustomParam(&param);
+
+	// Partial setup of Window Handler's custom parameter
+	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);	// TODO: Creation of the HBITMAP should be in the WindowHandler class
+	handler._cParam.bitmapAtHome = &bmp;
+	handler._cParam.hBmp = &hBmp;
+
 	handler.CallRedraw();
 
 	CustomHeader header;
