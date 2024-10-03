@@ -23,7 +23,7 @@
 
 #define BMP_PREVIEW_DIMS 200
 
-#define ENCODE_SCREEN_HWND_COUNT 10
+#define ENCODE_SCREEN_HWND_COUNT 9
 #define DECODE_SCREEN_HWND_COUNT 8
 
 class WindowHandler
@@ -73,7 +73,6 @@ private:
 	*/
 	static HWND** _hENCODEarrElements;			// Contains all of the pointers to the UI Elements of the Encoding screen
 	HWND _hENCODEbtnOpenHostBMP;				// duh
-	HWND _hENCODEbtnOpenParasiteFile;			// duh
 	HWND _hENCODEbtnInjectFile;					// duh
 	HWND _hENCODEbtnInjectMessage;				// duh
 	HWND _hENCODEeditParasiteMessage;			// duh
