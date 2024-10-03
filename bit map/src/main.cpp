@@ -26,16 +26,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	
 
-	BYTE* bStr = (BYTE*)str;
 	toolbox.HideData(&bmp, test._buffer, test._size, "png");
-
-
-
-
-	//test->SaveAsFile("ratilo.bmp");
-	//int rgb[3] = { 0, 0, 0 };
-	//bmp.ChangePixelAt(12, 2, rgb);
-	//bmp.SaveAsFile("textFile.bmp");
 
 	WindowCustomParam param;
 	param.bmp = &bmp;
@@ -44,18 +35,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	handler.SetCustomParam(&param);
 	handler.CallRedraw();
 
-	BYTE* extension;
-	BYTE* result = toolbox.ReadHiddenData(&bmp, &extension);
+	CustomHeader header;
+	BYTE* result = toolbox.ReadHiddenData(&bmp, &header);
 
-	std::string name;
 
 	char* appended = new char[100];
-	strcpy(appended, "jvjvj");
-	strcat(appended, (char*)extension);
+	strcpy(appended, "jvjvj.");
+	strcat(appended, (char*)header.extension);
 	
 	FILE* target;
 	fopen_s(&target, appended, "wb");
-	fwrite(result, 1, test._size, target);
+	fwrite(result, 1, header.size, target);
 	fclose(target);
 
 	delete result;

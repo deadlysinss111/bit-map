@@ -96,12 +96,11 @@ void BitmapToolbox::HideData(BitmapFile* target, BYTE* data, int dataLengh, cons
 void BitmapToolbox::HideDataHeader(BitmapFile* target, int dataLengh, const char* extension) {
 
 	BYTE* convertedData = new BYTE[CHEADER_SIZE];
-	memcpy(convertedData, &dataLengh, 4);
+	memcpy(convertedData, &dataLengh, CHEADER_SIZE);
 	//BYTE* convertedData = (BYTE*)dataLengh;
 	InternalHideData(target, convertedData, CHEADER_SIZE);
 
 
-	// wtf delete[]??
 	delete convertedData;
 
 	BYTE* convertedExtension = new BYTE[CHEADER_EXTENSION];
@@ -146,10 +145,10 @@ void BitmapToolbox::InternalHideData(BitmapFile* target, BYTE* data, int dataLen
 // READING DATA
 //
 
-BYTE* BitmapToolbox::ReadHiddenData(BitmapFile* target, BYTE** extension) {
+BYTE* BitmapToolbox::ReadHiddenData(BitmapFile* target, CustomHeader* headerAddr) {
 	CustomHeader header = ReadCustomHeader(target);
-	if (extension != nullptr) {
-		*extension = header.extension;
+	if (headerAddr != nullptr) {
+		*headerAddr = header;
 	}
 	BYTE* data = InternalReadHiddenData(target, header.size, CUSTOMHEADERSIZE);
 	return data;
@@ -163,12 +162,10 @@ CustomHeader BitmapToolbox::ReadCustomHeader(BitmapFile* target) {
 	BYTE* data = InternalReadHiddenData(target, CHEADER_SIZE);
 	resultHeader.size = *((int*)data);
 
-	delete data;
 
 	data = InternalReadHiddenData(target, CHEADER_EXTENSION, CHEADER_SIZE);
-	resultHeader.extension = data;
+	memcpy(&(resultHeader.extension), &data, CHEADER_EXTENSION);
 
-	delete data;
 
 	return resultHeader;
 }

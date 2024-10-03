@@ -19,7 +19,7 @@ public:
 	void Upscale(BitmapFile* target, int iterations = 1);
 
 	void HideData(BitmapFile* target, BYTE* data, int dataLengh, const char* extension = "txt");
-	BYTE* ReadHiddenData(BitmapFile* target, BYTE** extension = nullptr);
+	BYTE* ReadHiddenData(BitmapFile* target, CustomHeader* headerAddr = nullptr);
 
 	
 private:
