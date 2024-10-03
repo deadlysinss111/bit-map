@@ -50,7 +50,7 @@ private:
 	/*
 	   User data
 	*/
-	wchar_t _hostFilePath[MAX_PATH];
+	BitmapFile* _hostFile;
 	wchar_t _infectedFilePath[MAX_PATH];
 
 	/*

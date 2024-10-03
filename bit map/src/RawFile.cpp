@@ -17,7 +17,7 @@ void RawFile::LoadFile(const char* addr) {
 	fopen_s(&file, addr, "rb");
 
 	if (file == 0) {
-		std::cerr << "error in file reading" << std::endl;
+		std::cerr << "error in reading file : " << addr << std::endl;
 		return;
 	}
 

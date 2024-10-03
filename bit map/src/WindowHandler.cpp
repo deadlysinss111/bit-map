@@ -110,12 +110,18 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
             int hiW = HIWORD(wParam);
             int loW = LOWORD(wParam);
 
+            if (hiW != BN_CLICKED)
+            {
+                break;
+            }
             // Figure out which button sent the message
-            switch (hiW)
+            switch (loW)
             {
             case IDB_HOST:
-                if (loW == BN_CLICKED)
                 {
+                    wchar_t widePath[MAX_PATH] = { 0 };
+                    char path[MAX_PATH] = { 0 };
+
                     // Structure to open a file dialog box to retreve its path
                     OPENFILENAME ofn;
                     ZeroMemory(&ofn, sizeof(ofn));
@@ -124,13 +130,95 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
                     ofn.hInstance = _cParam.windowHandler->_hInstance;
                     ofn.lpstrFilter = L"BMP 24 bit Image\0*.bmp\0\0";
                     ofn.nFilterIndex = 1;
-                    ofn.lpstrFile = _cParam.windowHandler->_hostFilePath;
+                    ofn.lpstrFile = widePath;
                     ofn.nMaxFile = MAX_PATH;
                     ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
                     if (!GetOpenFileName(&ofn)) std::cerr << "Couldn't open the prompt probably ? idk" << std::endl;
-                    else std::wcout << "File path is " << _cParam.windowHandler->_hostFilePath << std::endl;
+                    else std::wcout << "File path is " << path << std::endl;
+                    if (*widePath == '\0') break;
+
+                    wcstombs(path, widePath, MAX_PATH);
+
+                    BitmapFile* bmp = new BitmapFile;
+                    bmp->LoadFile(path);
+                    CImageToolbox toolbox;
+
+                    HBITMAP* hBmp = new HBITMAP;
+                    *hBmp = CreateDIBitmap(_cParam.windowHandler->_hDc, bmp->_infoHeader, CBM_INIT, bmp->_pixelData, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
+
+                    //_cParam.windowHandler->_hostFile = toolbox.BitmapToCImage(&bmp);
+                    _cParam.windowHandler->_hostFile = bmp;
+                    _cParam.hBmp = hBmp;
                 }
+                break;
+
+            case IDB_INJECT_TEXT:
+                {
+                if (_cParam.windowHandler->_hostFile != nullptr) {
+                    wchar_t wideTxt[MAX_PATH] = { 0 };
+                    char txt[MAX_PATH] = { 0 };
+
+                    GetWindowText(_cParam.windowHandler->_hENCODEeditParasiteMessage, wideTxt, MAX_PATH);
+                    wcstombs(txt, wideTxt, MAX_PATH);
+
+                    BitmapToolbox toolbox;
+                    toolbox.HideData(_cParam.windowHandler->_hostFile, (BYTE*)txt, wcslen(wideTxt));
+                    //RawFile* rf = toolbox.CImageToBitmap(_cParam.windowHandler->_hostFile);
+                    //rf->SaveAsFile("gudule.bmp");
+                    }
+                }
+                break;
+
+            case IDB_INJECT_FILE:
+                {
+                if (_cParam.windowHandler->_hostFile != nullptr) {
+                    wchar_t widePath[MAX_PATH] = { 0 };
+                    char path[MAX_PATH] = { 0 };
+
+                    // Structure to open a file dialog box to retreve its path
+                    OPENFILENAME ofn;
+                    ZeroMemory(&ofn, sizeof(ofn));
+                    ofn.lStructSize = sizeof(OPENFILENAME);
+                    ofn.hwndOwner = _cParam.windowHandler->_hWnd;
+                    ofn.hInstance = _cParam.windowHandler->_hInstance;
+                    ofn.lpstrFilter = L"BMP 24 bit Image\0*.bmp\0\0";
+                    ofn.nFilterIndex = 1;
+                    ofn.lpstrFile = widePath;
+                    ofn.nMaxFile = MAX_PATH;
+                    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+                    if (!GetOpenFileName(&ofn)) std::cerr << "Couldn't open the prompt probably ? idk" << std::endl;
+                    else std::wcout << "File path is " << path << std::endl;
+                    if (*widePath == '\0') break;
+
+                    wcstombs(path, widePath, MAX_PATH);
+
+                    RawFile file;
+                    file.LoadFile(path);
+                    
+                    BitmapToolbox toolbox;
+
+                    CustomHeader header;
+                    toolbox.HideData(_cParam.windowHandler->_hostFile, file._buffer, file._size, path + ofn.nFileExtension);
+                    BYTE* result = toolbox.ReadHiddenData(_cParam.windowHandler->_hostFile, &header);
+
+                    _cParam.windowHandler->_hostFile->SaveAsFile("quedsion_mark.bmp");
+
+                    char* appended = new char[100];
+                    strcpy(appended, "uuuu.");
+                    strcat(appended, (char*)header.extension);
+
+                    FILE* target;
+                    fopen_s(&target, appended, "wb");
+                    fwrite(result, 1, header.size, target);
+                    fclose(target);
+
+                    }
+                }
+                break;
+
+            default:
                 break;
             }
         }
