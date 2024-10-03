@@ -31,10 +31,11 @@ WindowHandler::WindowHandler(HINSTANCE hInstance) {
     icex.dwICC = ICC_TAB_CLASSES; // Initialize tab control class
     InitCommonControlsEx(&icex);
 
-    /*
-       Initializes UI Elements
-    */
+    /* Initializes UI Elements */
     CreateUIElements();
+
+    /* Sets the app on the right tab */
+    TabCtrl_SetCurSel(_hTabControl, ENCODE_TAB_INDEX);
 }
 
 WindowHandler::~WindowHandler() {
@@ -43,6 +44,7 @@ WindowHandler::~WindowHandler() {
 
 void WindowHandler::RunWindow() {
     MSG msg = {};
+
     while (GetMessage(&msg, NULL, 0, 0))
     {
         TranslateMessage(&msg);
@@ -103,6 +105,37 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
     switch (uMsg)
     {
+    case WM_COMMAND:
+        {
+            int hiW = HIWORD(wParam);
+            int loW = LOWORD(wParam);
+
+            // Figure out which button sent the message
+            switch (hiW)
+            {
+            case IDB_HOST:
+                if (loW == BN_CLICKED)
+                {
+                    // Structure to open a file dialog box to retreve its path
+                    OPENFILENAME ofn;
+                    ZeroMemory(&ofn, sizeof(ofn));
+                    ofn.lStructSize = sizeof(OPENFILENAME);
+                    ofn.hwndOwner = _cParam.windowHandler->_hWnd;
+                    ofn.hInstance = _cParam.windowHandler->_hInstance;
+                    ofn.lpstrFilter = L"BMP 24 bit Image\0*.bmp\0\0";
+                    ofn.nFilterIndex = 1;
+                    ofn.lpstrFile = _cParam.windowHandler->_hostFilePath;
+                    ofn.nMaxFile = MAX_PATH;
+                    ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+                    if (!GetOpenFileName(&ofn)) std::cerr << "Couldn't open the prompt probably ? idk" << std::endl;
+                    else std::wcout << "File path is " << _cParam.windowHandler->_hostFilePath << std::endl;
+                }
+                break;
+            }
+        }
+        break;
+
     case WM_SIZE:
         _cParam.windowHandler->ResizeTabControl(lParam);
         break;
@@ -120,16 +153,21 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
         case TCN_SELCHANGE:
             switch (TabCtrl_GetCurSel(_cParam.windowHandler->_hTabControl))
             {
-                // !!! SWAPPED BEHAVIOUR !!! TODO
             case ENCODE_TAB_INDEX:
                 SendMessage(_cParam.windowHandler->_hWnd, WM_SETTEXT, 0, (LPARAM) & (_cParam.windowHandler->_encodeTabName));
                 // Make the UI elements of the Encode screen visible
                 for (int i = 0; i < ENCODE_SCREEN_HWND_COUNT; ++i)
+                {
                     ShowWindow(*_hENCODEarrElements[i], SW_SHOW);
+                    continue;
+                }
 
                 // Hides the UI elements of the Decode screen
                 for (int i = 0; i < DECODE_SCREEN_HWND_COUNT; ++i)
+                {
                     ShowWindow(*_hDECODEarrElements[i], SW_HIDE);
+                    continue;
+                }
 
                 std::cout << "Sel Change to ENCODE finished" << std::endl;
 
@@ -138,11 +176,17 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
                 SendMessage(_cParam.windowHandler->_hWnd, WM_SETTEXT, 0, (LPARAM) & (_cParam.windowHandler->_decodeTabName));
                 // Make the UI elements of the Decode screen visible
                 for (int i = 0; i < DECODE_SCREEN_HWND_COUNT; ++i)
+                {
                     ShowWindow(*_hDECODEarrElements[i], SW_SHOW);
+                    continue;
+                }
 
                 // Hides the UI elements of the Encode screen              
                 for (int i = 0; i < ENCODE_SCREEN_HWND_COUNT; ++i)
+                {
                     ShowWindow(*_hENCODEarrElements[i], SW_HIDE);
+                    continue;
+                }
 
                 std::cout << "Sel Change to DECODE finished" << std::endl;
 
@@ -165,6 +209,7 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
         //BitBlt(hDC, 10, 10, _cParam.bitmapFile->_infoHeader->biWidth, _cParam.bitmapFile->_infoHeader->biHeight, memDC, 0, 0, SRCCOPY);
     }
     break;
+
     case WM_DESTROY:
         PostQuitMessage(0);
         return 0;
@@ -189,8 +234,8 @@ HRESULT WindowHandler::ResizeTabControl(LPARAM ARGlParam)
 {
     RECT rcApp;
     GetClientRect(_hWnd, &rcApp);
-    if (!SetWindowPos(_hTabControl, HWND_TOP/*TODO : topmost ?*/, _globalPad, _globalPad, LOWORD(ARGlParam), HIWORD(ARGlParam), SWP_SHOWWINDOW)) {
-        std::cerr << "Faild to resize the Tab Control !" << std::endl;
+    if (!SetWindowPos(_hTabControl, HWND_TOP, _globalPad, _globalPad, LOWORD(ARGlParam), HIWORD(ARGlParam), SWP_SHOWWINDOW)) {
+        std::cerr << "Failed to resize the Tab Control !" << std::endl;
         return E_FAIL;
     }
 
@@ -223,12 +268,12 @@ void WindowHandler::CreateUIElements()
     TCIDecode.pszText = _decodeTabName;
     TCIDecode.cchTextMax = sizeof(_decodeTabName);
 
-    if (TabCtrl_InsertItem(_hTabControl, DECODE_TAB_INDEX, &TCIDecode) == -1) {
-        std::cerr << "Insertion of TCIDecode failed ! Destroying Tab Control..." << std::endl;
-        DestroyWindow(_hTabControl);
-    }
     if (TabCtrl_InsertItem(_hTabControl, ENCODE_TAB_INDEX, &TCIEncode) == -1) {
         std::cerr << "Insertion of TCIEncode failed ! Destroying Tab Control..." << std::endl;
+        DestroyWindow(_hTabControl);
+    }
+    if (TabCtrl_InsertItem(_hTabControl, DECODE_TAB_INDEX, &TCIDecode) == -1) {
+        std::cerr << "Insertion of TCIDecode failed ! Destroying Tab Control..." << std::endl;
         DestroyWindow(_hTabControl);
     }
 
@@ -251,7 +296,6 @@ void WindowHandler::CreateUIElements()
         rcTemp.left + _globalPad, rcTemp.top + _globalPad, 200, 20,
         _hWnd, (HMENU)IDB_HOST, _hInstance, NULL);
     if (_hENCODEbtnOpenHostBMP == NULL) std::cerr << "Creation of the Host Button failed and is NULL !";
-    else std::cout << "btnOpenHost (" << rcTemp.left << ", " << rcTemp.top << std::endl;
     _hENCODEarrElements[0] = &_hENCODEbtnOpenHostBMP;
 
     GetWindowRect(_hENCODEbtnOpenHostBMP, &rcTemp);
@@ -370,6 +414,7 @@ void WindowHandler::CreateUIElements()
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEstaticOperationResult == NULL) std::cerr << "Creation of the Static Message Title failed and is NULL !";
     _hDECODEarrElements[4] = &_hDECODEstaticMessageTitle;
+    std::cout << "DECODE[4] : " << _hDECODEarrElements[4] << std::endl;
 
     GetWindowRect(_hDECODEstaticMessageTitle, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -379,6 +424,7 @@ void WindowHandler::CreateUIElements()
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEeditExtractedData == NULL) std::cerr << "Creation of the Extracted Data Area failed and is NULL !";
     _hDECODEarrElements[5] = &_hDECODEeditExtractedData;
+    std::cout << "DECODE[5] : " << _hDECODEarrElements[5] << std::endl;
 
     GetWindowRect(_hDECODEeditExtractedData, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -388,4 +434,6 @@ void WindowHandler::CreateUIElements()
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEbtnExtractData == NULL) std::cerr << "Creation of the Extract Data Button failed and is NULL !";
     _hDECODEarrElements[6] = &_hDECODEbtnExtractData;
+    std::cout << "DECODE[6] : " << _hDECODEarrElements[6] << std::endl;
+    std::cout << "Last Error : " << GetLastError();
 }

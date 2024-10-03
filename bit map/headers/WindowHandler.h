@@ -12,10 +12,10 @@
 
 #define IDB_HOST 0 
 #define IDB_PARASITE 1
-#define IDE_PARASITE 2
 #define IDB_INJECT_FILE 3
 #define IDB_INJECT_TEXT 4
 #define IDB_INFECTED 5
+#define IDE_PARASITE 2
 
 #define BMP_PREVIEW_DIMS 200
 
@@ -44,6 +44,13 @@ private:
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void RegisterWindowClass();
 	HWND CreateMainWindow();
+
+
+	/*
+	   User data
+	*/
+	wchar_t _hostFilePath[MAX_PATH];
+	wchar_t _infectedFilePath[MAX_PATH];
 
 	/*
 	   UI Elements : Tabs
