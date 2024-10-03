@@ -147,6 +147,9 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
                 HBITMAP* hBmp = new HBITMAP;
                 *hBmp = CreateDIBitmap(_cParam.windowHandler->_hDc, bmp->_infoHeader, CBM_INIT, bmp->_pixelData, (BITMAPINFO*)bmp->_infoHeader, DIB_RGB_COLORS);
 
+                // Updates the bitmap shown in the Static Window (hopefully)
+                SendMessage(_cParam.windowHandler->_hENCODEstaticHostBitmap, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)_cParam.hBmp);
+
                 //_cParam.encodingSanePreview = toolbox.BitmapToCImage(&bmp);
                 _cParam.encodingSanePreview = bmp;
                 _cParam.hBmp = hBmp;
@@ -292,6 +295,11 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
             switch (TabCtrl_GetCurSel(_cParam.windowHandler->_hTabControl))
             {
             case ENCODE_TAB_INDEX:
+
+                // TODO: Remove eventually lol
+                std::cout << "WARNING, there is an early break statement" << std::endl;
+                break;
+
                 SendMessage(_cParam.windowHandler->_hWnd, WM_SETTEXT, 0, (LPARAM) & (_cParam.windowHandler->_encodeTabName));
                 // Make the UI elements of the Encode screen visible
                 for (int i = 0; i < ENCODE_SCREEN_HWND_COUNT; ++i)
@@ -311,6 +319,11 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
 
                 break;
             case DECODE_TAB_INDEX:
+
+                // TODO: Remove eventually lol
+                std::cout << "WARNING, there is an early break statement" << std::endl;
+                break;
+
                 SendMessage(_cParam.windowHandler->_hWnd, WM_SETTEXT, 0, (LPARAM) & (_cParam.windowHandler->_decodeTabName));
                 // Make the UI elements of the Decode screen visible
                 for (int i = 0; i < DECODE_SCREEN_HWND_COUNT; ++i)
@@ -452,14 +465,23 @@ void WindowHandler::CreateUIElements()
     if (_hENCODEbtnOpenHostBMP == NULL) std::cerr << "Creation of the Host Button failed and is NULL !";
     _hENCODEarrElements[0] = &_hENCODEbtnOpenHostBMP;
 
+    //GetWindowRect(_hENCODEbtnOpenHostBMP, &rcTemp);
+    //MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    //_hENCODEstaticHostPreview = CreateWindow(
+    //    WC_STATIC, L"", STATIC_FRAME_STYLE,
+    //    rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS, BMP_PREVIEW_DIMS,
+    //    _hWnd, NULL, _hInstance, NULL);
+    //if (_hENCODEstaticHostPreview == NULL) std::cerr << "Creation of the Static Host Preview failed and is NULL !";
+    //_hENCODEarrElements[1] = &_hENCODEstaticHostPreview;
+
     GetWindowRect(_hENCODEbtnOpenHostBMP, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
-    _hENCODEstaticHostPreview = CreateWindow(
-        WC_STATIC, L"", STATIC_FRAME_STYLE,
-        rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS, BMP_PREVIEW_DIMS,
+    _hENCODEstaticHostBitmap = CreateWindow(
+        WC_STATIC, L"HostBMP", STATIC_BITMAP_STYLE,
+        rcTemp.left++, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS - 2, BMP_PREVIEW_DIMS - 2,
         _hWnd, NULL, _hInstance, NULL);
-    if (_hENCODEstaticHostPreview == NULL) std::cerr << "Creation of the Static Host Preview failed and is NULL !";
-    _hENCODEarrElements[1] = &_hENCODEstaticHostPreview;
+    if (_hENCODEstaticHostBitmap == NULL) std::cerr << "Creation of the Static Host Bitmap failed and is NULL !";
+    _hENCODEarrElements[2] = &_hENCODEstaticHostBitmap;
 
     GetWindowRect(_hENCODEstaticHostPreview, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -468,7 +490,7 @@ void WindowHandler::CreateUIElements()
         rcTemp.left, rcTemp.bottom + _strongPad, 200, 20,
         _hWnd, (HMENU)IDB_PARASITE, _hInstance, NULL);
     if (_hENCODEbtnOpenParasiteFile == NULL) std::cerr << "Creation of the Parasite Button failed and is NULL !";
-    _hENCODEarrElements[2] = &_hENCODEbtnOpenParasiteFile;
+    _hENCODEarrElements[3] = &_hENCODEbtnOpenParasiteFile;
 
     GetWindowRect(_hENCODEbtnOpenParasiteFile, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -477,7 +499,7 @@ void WindowHandler::CreateUIElements()
         rcTemp.left - _smolPad, rcTemp.bottom + _globalPad, 200 + _smolPad, 100,
         _hWnd, (HMENU)IDE_PARASITE, _hInstance, NULL);
     if (_hENCODEeditParasiteMessage == NULL) std::cerr << "Creation of the Edit Parasite failed and is NULL !";
-    _hENCODEarrElements[3] = &_hENCODEeditParasiteMessage;
+    _hENCODEarrElements[4] = &_hENCODEeditParasiteMessage;
 
     GetWindowRect(_hENCODEbtnOpenHostBMP, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -486,7 +508,7 @@ void WindowHandler::CreateUIElements()
         rcTemp.right + _strongPad, rcTemp.top, 400, 15,
         _hWnd, NULL, _hInstance, NULL);
     if (_hENCODEstaticResultTitle == NULL) std::cerr << "Creation of the Static Result Title failed and is NULL !";
-    _hENCODEarrElements[4] = &_hENCODEstaticResultTitle;
+    _hENCODEarrElements[5] = &_hENCODEstaticResultTitle;
 
     GetWindowRect(_hENCODEstaticResultTitle, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -495,7 +517,16 @@ void WindowHandler::CreateUIElements()
         rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS * 2, BMP_PREVIEW_DIMS * 2,
         _hWnd, NULL, _hInstance, NULL);
     if (_hENCODEstaticResultPreview == NULL) std::cerr << "Creation of the Static Result Preview failed and is NULL !";
-    _hENCODEarrElements[5] = &_hENCODEstaticResultPreview;
+    _hENCODEarrElements[6] = &_hENCODEstaticResultPreview;
+
+    GetWindowRect(_hENCODEstaticResultPreview, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    _hENCODEstaticResultBitmap = CreateWindow(
+        WC_STATIC, L"ResultBMP", STATIC_BITMAP_STYLE,
+        rcTemp.left++, rcTemp.top++, BMP_PREVIEW_DIMS * 2 - 2, BMP_PREVIEW_DIMS * 2 - 2,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hENCODEstaticResultBitmap == NULL) std::cerr << "Creation of the Static Result Bitmap failed and is NULL !";
+    _hENCODEarrElements[7] = &_hENCODEstaticResultBitmap;
 
     GetWindowRect(_hENCODEstaticResultPreview, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -504,14 +535,14 @@ void WindowHandler::CreateUIElements()
         rcTemp.left + 2 * _strongPad, rcTemp.bottom + _strongPad, 130, 20,
         _hWnd, (HMENU)IDB_INJECT_FILE, _hInstance, NULL);
     if (_hENCODEbtnInjectFile == NULL) std::cerr << "Creation of the Injectf File Button failed and is NULL !";
-    _hENCODEarrElements[6] = &_hENCODEbtnInjectFile;
+    _hENCODEarrElements[8] = &_hENCODEbtnInjectFile;
 
     _hENCODEbtnInjectMessage = CreateWindow(
         WC_BUTTON, L"Inject message", BUTTON_STYLE,
         rcTemp.right - 130 - 2 * _strongPad, rcTemp.bottom + _strongPad, 130, 20,
         _hWnd, (HMENU)IDB_INJECT_TEXT, _hInstance, NULL);
     if (_hENCODEbtnInjectMessage == NULL) std::cerr << "Creation of the Inject Message Button failed and is NULL !";
-    _hENCODEarrElements[7] = &_hENCODEbtnInjectMessage;
+    _hENCODEarrElements[9] = &_hENCODEbtnInjectMessage;
 
     /*
        Initializes UI Elements : Decoding Screen
@@ -541,7 +572,16 @@ void WindowHandler::CreateUIElements()
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEstaticInfectedPreview == NULL) std::cerr << "Creation of the Static Infected Preview failed and is NULL !";
     _hDECODEarrElements[1] = &_hDECODEstaticInfectedPreview;
-    
+
+    GetWindowRect(_hDECODEstaticInfectedPreview, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    _hDECODEstaticInfectedBitmap = CreateWindow(
+        WC_STATIC, L"InfectedBMP", STATIC_BITMAP_STYLE,
+        rcTemp.left++, rcTemp.top++, BMP_PREVIEW_DIMS - 2, BMP_PREVIEW_DIMS - 2,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hDECODEstaticInfectedBitmap == NULL) std::cerr << "Creation of the Static Infected Preview failed and is NULL !";
+    _hDECODEarrElements[2] = &_hDECODEstaticInfectedBitmap;
+
     GetWindowRect(_hDECODEstaticInfectedPreview, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
     _hDECODEstaticOperationResult = CreateWindow(
@@ -549,7 +589,7 @@ void WindowHandler::CreateUIElements()
         rcTemp.left, rcTemp.bottom + 5 * _strongPad, 200, 15,
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEstaticOperationResult == NULL) std::cerr << "Creation of the Extraction Result Title failed and is NULL !";
-    _hDECODEarrElements[2] = &_hDECODEstaticOperationResult;
+    _hDECODEarrElements[3] = &_hDECODEstaticOperationResult;
 
     GetWindowRect(_hDECODEstaticOperationResult, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -558,7 +598,7 @@ void WindowHandler::CreateUIElements()
         rcTemp.left, rcTemp.bottom + _globalPad, 200, 70,
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEeditOperationResult == NULL) std::cerr << "Creation of the Extraction Result Text failed and is NULL !";
-    _hDECODEarrElements[3] = &_hDECODEeditOperationResult;
+    _hDECODEarrElements[4] = &_hDECODEeditOperationResult;
 
     GetWindowRect(_hDECODEbtnOpenInfectedBMP, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -567,8 +607,7 @@ void WindowHandler::CreateUIElements()
         rcTemp.right + _strongPad, rcTemp.top, 200, 15,
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEstaticOperationResult == NULL) std::cerr << "Creation of the Static Message Title failed and is NULL !";
-    _hDECODEarrElements[4] = &_hDECODEstaticMessageTitle;
-    std::cout << "DECODE[4] : " << _hDECODEarrElements[4] << std::endl;
+    _hDECODEarrElements[5] = &_hDECODEstaticMessageTitle;
 
     GetWindowRect(_hDECODEstaticMessageTitle, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -577,17 +616,14 @@ void WindowHandler::CreateUIElements()
         rcTemp.left, rcTemp.bottom + _globalPad, 300, 170,
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEeditExtractedData == NULL) std::cerr << "Creation of the Extracted Data Area failed and is NULL !";
-    _hDECODEarrElements[5] = &_hDECODEeditExtractedData;
-    std::cout << "DECODE[5] : " << _hDECODEarrElements[5] << std::endl;
+    _hDECODEarrElements[6] = &_hDECODEeditExtractedData;
 
     GetWindowRect(_hDECODEeditExtractedData, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
     _hDECODEbtnExtractData = CreateWindow(
         WC_BUTTON, L"Extract Data", BUTTON_STYLE,
         rcTemp.left + rcTemp.right / 2, rcTemp.bottom + _strongPad, 200, 20,
-        _hWnd, (HMENU)IDB_EXTRACT_BUTTON, _hInstance, NULL);
+        _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEbtnExtractData == NULL) std::cerr << "Creation of the Extract Data Button failed and is NULL !";
-    _hDECODEarrElements[6] = &_hDECODEbtnExtractData;
-    std::cout << "DECODE[6] : " << _hDECODEarrElements[6] << std::endl;
-    std::cout << "Last Error : " << GetLastError();
+    _hDECODEarrElements[7] = &_hDECODEbtnExtractData;
 }

@@ -4,11 +4,12 @@
 #define ENCODE_TAB_INDEX 0
 #define DECODE_TAB_INDEX 1
 
-#define STATIC_TEXT_STYLE  /* ==> */ WS_VISIBLE | WS_CHILD
-#define STATIC_FRAME_STYLE /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER
-#define BUTTON_STYLE       /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | BS_PUSHBUTTON
-#define EDIT_STYLE         /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN
-#define FIXED_EDIT_STYLE   /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY
+#define STATIC_TEXT_STYLE   /* ==> */ WS_VISIBLE | WS_CHILD
+#define STATIC_FRAME_STYLE  /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER
+#define STATIC_BITMAP_STYLE /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | SS_BITMAP
+#define BUTTON_STYLE        /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | BS_PUSHBUTTON
+#define EDIT_STYLE          /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN
+#define FIXED_EDIT_STYLE    /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY
 
 #define IDB_HOST 0 
 #define IDB_PARASITE 1
@@ -22,8 +23,8 @@
 
 #define BMP_PREVIEW_DIMS 200
 
-#define ENCODE_SCREEN_HWND_COUNT 8
-#define DECODE_SCREEN_HWND_COUNT 7
+#define ENCODE_SCREEN_HWND_COUNT 10
+#define DECODE_SCREEN_HWND_COUNT 8
 
 class WindowHandler
 {
@@ -78,6 +79,8 @@ private:
 	HWND _hENCODEstaticHostPreview;				// duh
 	HWND _hENCODEstaticResultPreview;			// duh
 	HWND _hENCODEstaticResultTitle;				// duh
+	HWND _hENCODEstaticHostBitmap;				// duh
+	HWND _hENCODEstaticResultBitmap;			// duh
 
 	/*
 	   UI Elements : Decoding screen
@@ -90,6 +93,7 @@ private:
 	HWND _hDECODEstaticOperationResult;			// duh
 	HWND _hDECODEeditOperationResult;			// duh
 	HWND _hDECODEeditExtractedData;				// duh
+	HWND _hDECODEstaticInfectedBitmap;			// duh
 
 	/*
 	   UI Elements : Padding constants
