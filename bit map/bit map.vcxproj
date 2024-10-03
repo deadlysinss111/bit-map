@@ -130,7 +130,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\CColor.cpp" />
+    <ClCompile Include="src\CImageToolbox.cpp" />
+    <ClCompile Include="src\CImage.cpp" />
     <ClCompile Include="src\BitmapFile.cpp" />
     <ClCompile Include="src\RawFile.cpp" />
     <ClCompile Include="src\main.cpp" />
@@ -138,7 +139,8 @@
     <ClCompile Include="src\WindowHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="headers\CColor.h" />
+    <ClInclude Include="headers\CImageToolbox.h" />
+    <ClInclude Include="headers\CImage.h" />
     <ClInclude Include="headers\BitmapFile.h" />
     <ClInclude Include="headers\RawFile.h" />
     <ClInclude Include="headers\pch.h" />

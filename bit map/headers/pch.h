@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <bitset>
 
 #include <Windows.h>
 #include <wingdi.h>
@@ -15,7 +16,8 @@ class BitmapToolbox;
 class WindowHandler;
 class RawFile;
 class BitmapFile;
-class CColor;
+class CImage;
+class CImageToolbox;
 
 struct WindowCustomParam;
 struct CustomHeader;
@@ -26,4 +28,5 @@ struct CustomHeader;
 #include "WindowHandler.h"
 #include "RawFile.h"
 #include "BitmapFile.h"
-#include "CColor.h"
+#include "CImage.h"
+#include "CImageToolbox.h"

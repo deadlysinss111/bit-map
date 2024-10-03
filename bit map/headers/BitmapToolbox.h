@@ -1,13 +1,5 @@
 #pragma once
 
-#define CUSTOMHEADERSIZE 16
-#define CHEADER_SIZE 4
-#define CHEADER_EXTENSION 8
-
-struct CustomHeader {
-	uint64_t size;
-	BYTE* extension;
-};
 
 class BitmapToolbox{
 public:

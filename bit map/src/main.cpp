@@ -14,12 +14,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 	BitmapFile bmp;
 
-	bmp.LoadFile("long.bmp");
+	bmp.LoadFile("smile.bmp");
 	//bmp.Upscale(2);
 
-	BitmapToolbox toolbox;
+	std::cout << bmp._infoHeader->biXPelsPerMeter << " || " << bmp._infoHeader->biYPelsPerMeter << std::endl;
 
-	const char* str = "test";
+	BitmapToolbox toolbox;
 
 	RawFile test;
 	test.LoadFile("ff.png");
