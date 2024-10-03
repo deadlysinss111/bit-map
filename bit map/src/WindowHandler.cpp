@@ -36,12 +36,6 @@ WindowHandler::WindowHandler(HINSTANCE hInstance) {
        Initializes UI Elements
     */
     CreateUIElements();
-
-    std::cout << "Address of the first element in _hENCODEarrElements : " << _hENCODEarrElements << std::endl;
-    std::cout << "Address of the first  HWND* in _hENCODEarrElements : " << _hENCODEarrElements[0] << std::endl;
-    std::cout << "Address of the second HWND* in _hENCODEarrElements : " << _hENCODEarrElements[1] << std::endl;
-    std::cout << "Address gap : " << _hENCODEarrElements[1] - _hENCODEarrElements[0] << std::endl;                           // Returns 5 ???
-    std::cout << "Address gap : " << (uint64_t)_hENCODEarrElements[1] - (uint64_t)_hENCODEarrElements[0] << std::endl;       // Returns 40 ???
 }
 
 WindowHandler::~WindowHandler() {
@@ -127,6 +121,7 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
         case TCN_SELCHANGE:
             switch (TabCtrl_GetCurSel(_cParam.windowHandler->_hTabControl))
             {
+            // !!! SWAPPED BEHAVIOUR !!! TODO
             case ENCODE_TAB_INDEX:
                 SendMessage(_cParam.windowHandler->_hWnd, WM_SETTEXT, 0, (LPARAM) &(_cParam.windowHandler->_encodeTabName));
                 // Make the UI elements of the Encode screen visible
@@ -134,17 +129,25 @@ LRESULT WindowHandler::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lP
                     ShowWindow(*_hENCODEarrElements[i], SW_SHOW);
 
                 // Hides the UI elements of the Decode screen
-                // TODO
+                for (int i = 0; i < DECODE_SCREEN_HWND_COUNT; ++i)
+                    ShowWindow(*_hDECODEarrElements[i], SW_HIDE);
+
+                std::cout << "Sel Change to ENCODE finished" << std::endl;
+
                 break;
             case DECODE_TAB_INDEX:
                 SendMessage(_cParam.windowHandler->_hWnd, WM_SETTEXT, 0, (LPARAM) &(_cParam.windowHandler->_decodeTabName));
                 // Make the UI elements of the Decode screen visible
-                // TODO
-                
+                for (int i = 0; i < DECODE_SCREEN_HWND_COUNT; ++i)
+                    ShowWindow(*_hDECODEarrElements[i], SW_SHOW);
+
                 // Hides the UI elements of the Encode screen              
                 for (int i = 0; i < ENCODE_SCREEN_HWND_COUNT; ++i)
                     ShowWindow(*_hENCODEarrElements[i], SW_HIDE);
 
+                std::cout << "Sel Change to DECODE finished" << std::endl;
+
+                break;
             }
             break;
         }
@@ -235,12 +238,12 @@ void WindowHandler::CreateUIElements()
     TCIDecode.pszText = _decodeTabName;
     TCIDecode.cchTextMax = sizeof(_decodeTabName);
 
-    if (TabCtrl_InsertItem(_hTabControl, ENCODE_TAB_INDEX, &TCIEncode) == -1) {
-        std::cerr << "Insertion of TCIEncode failed ! Destroying Tab Control..." << std::endl;
-        DestroyWindow(_hTabControl);
-    }
     if (TabCtrl_InsertItem(_hTabControl, DECODE_TAB_INDEX, &TCIDecode) == -1) {
         std::cerr << "Insertion of TCIDecode failed ! Destroying Tab Control..." << std::endl;
+        DestroyWindow(_hTabControl);
+    }
+    if (TabCtrl_InsertItem(_hTabControl, ENCODE_TAB_INDEX, &TCIEncode) == -1) {
+        std::cerr << "Insertion of TCIEncode failed ! Destroying Tab Control..." << std::endl;
         DestroyWindow(_hTabControl);
     }
 
@@ -328,7 +331,7 @@ void WindowHandler::CreateUIElements()
     _hENCODEarrElements[7] = &_hENCODEbtnInjectMessage;
 
     /*
-       Initializes UI Elements : Deconding Screen
+       Initializes UI Elements : Decoding Screen
        - Creates the button for the target
        - Creates the static window for the .bmp preview
        - Creates the static text to know where errors would go
@@ -345,6 +348,7 @@ void WindowHandler::CreateUIElements()
         rcTemp.left + _globalPad, rcTemp.bottom + _globalPad, 200, 20,
         _hWnd, (HMENU)IDB_INFECTED, _hInstance, NULL);
     if (_hDECODEbtnOpenInfectedBMP == NULL) std::cerr << "Creation of the Open Infected Button failed and is NULL !";
+    _hDECODEarrElements[0] = &_hDECODEbtnOpenInfectedBMP;
 
     GetWindowRect(_hDECODEbtnOpenInfectedBMP, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -353,6 +357,7 @@ void WindowHandler::CreateUIElements()
         rcTemp.left, rcTemp.bottom + _globalPad, BMP_PREVIEW_DIMS, BMP_PREVIEW_DIMS,
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEstaticInfectedPreview == NULL) std::cerr << "Creation of the Static Infected Preview failed and is NULL !";
+    _hDECODEarrElements[1] = &_hDECODEstaticInfectedPreview;
 
     GetWindowRect(_hDECODEstaticInfectedPreview, &rcTemp);
     MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
@@ -361,4 +366,41 @@ void WindowHandler::CreateUIElements()
         rcTemp.left, rcTemp.bottom + 5 * _strongPad, 200, 15,
         _hWnd, NULL, _hInstance, NULL);
     if (_hDECODEstaticOperationResult == NULL) std::cerr << "Creation of the Extraction Result Title failed and is NULL !";
+    _hDECODEarrElements[2] = &_hDECODEstaticOperationResult;
+
+    GetWindowRect(_hDECODEstaticOperationResult, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    _hDECODEeditOperationResult = CreateWindow(
+        WC_EDIT, L"", FIXED_EDIT_STYLE,
+        rcTemp.left, rcTemp.bottom + _globalPad, 200, 70,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hDECODEeditOperationResult == NULL) std::cerr << "Creation of the Extraction Result Text failed and is NULL !";
+    _hDECODEarrElements[3] = &_hDECODEeditOperationResult;
+
+    GetWindowRect(_hDECODEbtnOpenInfectedBMP, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    _hDECODEstaticMessageTitle = CreateWindow(
+        WC_STATIC, L"Extracted data from the infected file :", STATIC_TEXT_STYLE,
+        rcTemp.right + _strongPad, rcTemp.top, 200, 15,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hDECODEstaticOperationResult == NULL) std::cerr << "Creation of the Static Message Title failed and is NULL !";
+    _hDECODEarrElements[4] = &_hDECODEstaticMessageTitle;
+
+    GetWindowRect(_hDECODEstaticMessageTitle, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    _hDECODEeditExtractedData = CreateWindow(
+        WC_EDIT, L"", FIXED_EDIT_STYLE,
+        rcTemp.left, rcTemp.bottom + _globalPad, 300, 170,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hDECODEeditExtractedData == NULL) std::cerr << "Creation of the Extracted Data Area failed and is NULL !";
+    _hDECODEarrElements[5] = &_hDECODEeditExtractedData;
+
+    GetWindowRect(_hDECODEeditExtractedData, &rcTemp);
+    MapWindowPoints(NULL, _hTabControl, (LPPOINT)&rcTemp, 2);
+    _hDECODEbtnExtractData = CreateWindow(
+        WC_BUTTON, L"Extract Data", BUTTON_STYLE,
+        rcTemp.left + rcTemp.right / 2, rcTemp.bottom + _strongPad, 200, 20,
+        _hWnd, NULL, _hInstance, NULL);
+    if (_hDECODEbtnExtractData == NULL) std::cerr << "Creation of the Extract Data Button failed and is NULL !";
+    _hDECODEarrElements[6] = &_hDECODEbtnExtractData;
 }

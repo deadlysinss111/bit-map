@@ -4,9 +4,10 @@
 #define DECODE_TAB_INDEX 1
 
 #define STATIC_TEXT_STYLE  /* ==> */ WS_VISIBLE | WS_CHILD
-#define STATIC_FRAME_STYLE /* ==> */ WS_VISIBLE | WS_BORDER | WS_CHILD
-#define BUTTON_STYLE       /* ==> */ WS_VISIBLE | WS_BORDER | WS_CHILD | BS_PUSHBUTTON
-#define EDIT_STYLE         /* ==> */ WS_VISIBLE | WS_BORDER | WS_CHILD | ES_LEFT | ES_MULTILINE | ES_WANTRETURN | ES_AUTOVSCROLL
+#define STATIC_FRAME_STYLE /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER
+#define BUTTON_STYLE       /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | BS_PUSHBUTTON
+#define EDIT_STYLE         /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_WANTRETURN
+#define FIXED_EDIT_STYLE   /* ==> */ WS_VISIBLE | WS_CHILD | WS_BORDER | ES_LEFT | ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY
 
 #define IDB_HOST 0 
 #define IDB_PARASITE 1
@@ -18,7 +19,7 @@
 #define BMP_PREVIEW_DIMS 200
 
 #define ENCODE_SCREEN_HWND_COUNT 8
-#define DECODE_SCREEN_HWND_COUNT 8
+#define DECODE_SCREEN_HWND_COUNT 7
 
 struct WindowCustomParam {
 	WindowHandler* windowHandler;
@@ -77,13 +78,13 @@ private:
 	   UI Elements : Decoding screen
 	*/
 	static HWND** _hDECODEarrElements;			// Contains all of the pointers to the UI Elements of the Deconding screen
-	HWND _hDECODEbtnOpenInfectedBMP;
-	HWND _hDECODEbtnExtractData;
-	HWND _hDECODEstaticInfectedPreview;
-	HWND _hDECODEstaticMessageTitle;
-	HWND _hDECODEstaticOperationResult;
-	HWND _hDECODEeditOperationResult;
-	HWND _hDECODEeditExtractedData;
+	HWND _hDECODEbtnOpenInfectedBMP;			// duh
+	HWND _hDECODEbtnExtractData;				// duh
+	HWND _hDECODEstaticInfectedPreview;			// duh
+	HWND _hDECODEstaticMessageTitle;			// duh
+	HWND _hDECODEstaticOperationResult;			// duh
+	HWND _hDECODEeditOperationResult;			// duh
+	HWND _hDECODEeditExtractedData;				// duh
 
 	/*
 	   UI Elements : Padding constants
