@@ -10,11 +10,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 
 	WindowHandler handler(hInstance);
-	
-
 	BitmapFile bmp;
 
-	bmp.LoadFile("smile.bmp");
+	// Bêtise time
+	bmp.LoadFile("long.bmp");
 	//bmp.Upscale(2);
 
 	std::cout << bmp._infoHeader->biXPelsPerMeter << " || " << bmp._infoHeader->biYPelsPerMeter << std::endl;
@@ -24,15 +23,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	RawFile test;
 	test.LoadFile("ff.png");
 
+	toolbox.HideData(&bmp, test._buffer, test._size, "png");
 	
 
-	toolbox.HideData(&bmp, test._buffer, test._size, "png");
 
-	WindowCustomParam param;
-	param.bmp = &bmp;
-	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);
-	param.hBmp = &hBmp;
-	handler.SetCustomParam(&param);
 	handler.CallRedraw();
 
 	CustomHeader header;
@@ -48,9 +42,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	fwrite(result, 1, header.size, target);
 	fclose(target);
 
-	delete result;
+	//delete result;
 
 	//std::cout << "result is : "<< (char*)result << "." << (char*)extension << std::endl;
+
+	// Partial setup of Window Handler's custom parameter
+	HBITMAP hBmp = handler.CreateBmpHandler(&bmp);	// TODO: Creation of the HBITMAP should be in the WindowHandler class
+	handler._cParam.hBmp = &hBmp;
 
 	handler.RunWindow();
 }
