@@ -15,7 +15,10 @@
 #define IDB_INJECT_FILE 3
 #define IDB_INJECT_TEXT 4
 #define IDB_INFECTED 5
+#define IDB_EXTRACT_BUTTON 7
+
 #define IDE_PARASITE 2
+#define IDE_PARASITE_EXTRACTED 6
 
 #define BMP_PREVIEW_DIMS 200
 
@@ -103,4 +106,7 @@ struct WindowCustomParam {
 	WindowHandler* windowHandler;
 	HBITMAP* hBmp;
 	CImage* img;
+	RawFile* encodingSanePreview;
+	RawFile* encodingInfectedPreview;
+	RawFile* decodingPreview;
 };

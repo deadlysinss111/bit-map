@@ -5,7 +5,7 @@
 #define CHEADER_EXTENSION 8
 
 struct CustomHeader {
-	uint64_t size;
+	uint32_t size;
 	BYTE* extension;
 };
 

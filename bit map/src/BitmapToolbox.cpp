@@ -88,13 +88,46 @@ void BitmapToolbox::InternalUpscale(BitmapFile* target) {
 // HIDE DATA
 //
 
-void BitmapToolbox::HideData(BitmapFile* target, BYTE* data, int dataLengh, const char* extension) {
+bool BitmapToolbox::HideData(BitmapFile* target, BYTE* data, int dataLengh, const char* extension) {
+	if (target->_size <= dataLengh) {
+		std::cout << "data too long, can't be stored in bmp" << std::endl;
+		return false;
+	}
 
 	HideDataHeader(target, dataLengh, extension);
 	InternalHideData(target, data, dataLengh, CUSTOMHEADERSIZE);
+	return true;
+}
+
+bool BitmapToolbox::HideData(RawFile* target, BYTE* data, int dataLengh, const char* extension) {
+	if (target->_size <= dataLengh) {
+		std::cout << "data too long, can't be stored in bmp" << std::endl;
+		return false;
+	}
+
+	HideDataHeader(target, dataLengh, extension);
+	InternalHideData(target, data, dataLengh, CUSTOMHEADERSIZE);
+	return true;
 }
 
 void BitmapToolbox::HideDataHeader(BitmapFile* target, int dataLengh, const char* extension) {
+
+	BYTE* convertedData = new BYTE[CHEADER_SIZE];
+	memcpy(convertedData, &dataLengh, CHEADER_SIZE);
+	//BYTE* convertedData = (BYTE*)dataLengh;
+	InternalHideData(target, convertedData, CHEADER_SIZE);
+
+
+	delete convertedData;
+
+	BYTE* convertedExtension = new BYTE[CHEADER_EXTENSION];
+	memcpy(convertedExtension, extension, CHEADER_EXTENSION);
+	InternalHideData(target, convertedExtension, CHEADER_EXTENSION, CHEADER_SIZE);
+
+	delete convertedExtension;
+}
+
+void BitmapToolbox::HideDataHeader(RawFile* target, int dataLengh, const char* extension) {
 
 	BYTE* convertedData = new BYTE[CHEADER_SIZE];
 	memcpy(convertedData, &dataLengh, CHEADER_SIZE);
@@ -141,6 +174,37 @@ void BitmapToolbox::InternalHideData(BitmapFile* target, BYTE* data, int dataLen
 	}
 }
 
+void BitmapToolbox::InternalHideData(RawFile* target, BYTE* data, int dataLengh, int startingPoint) {
+	BYTE* pixelData = target->_buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	for (int i = startingPoint; i < dataLengh + startingPoint; i++) {
+		BYTE* targ = pixelData + 4 * i;
+		*targ >>= 2;
+		*targ <<= 2;
+		BYTE tmp = (data[i - startingPoint] & 0b11000000) >> 6;
+		*targ |= tmp;
+
+		targ = pixelData + 4 * i + 1;
+		*targ >>= 2;
+		*targ <<= 2;
+		tmp = (data[i - startingPoint] & 0b00110000) >> 4;
+		*targ |= tmp;
+
+		targ = pixelData + 4 * i + 2;
+		*targ >>= 2;
+		*targ <<= 2;
+		tmp = (data[i - startingPoint] & 0b00001100) >> 2;
+		*targ |= tmp;
+
+		targ = pixelData + 4 * i + 3;
+		*targ >>= 2;
+		*targ <<= 2;
+		tmp = (data[i - startingPoint] & 0b00000011);
+		*targ |= tmp;
+
+		//std::cout << "WRINTING WITNESS; TRY : " << i << "VALUE : " << std::bitset<8>(data[i - startingPoint]) << " || " << std::bitset<8>(*targ) << std::endl;
+	}
+}
+
 
 //
 // READING DATA
@@ -156,7 +220,32 @@ BYTE* BitmapToolbox::ReadHiddenData(BitmapFile* target, CustomHeader* headerAddr
 	//lets just treat the data as txt for now
 }
 
+BYTE* BitmapToolbox::ReadHiddenData(RawFile* target, CustomHeader* headerAddr) {
+	CustomHeader header = ReadCustomHeader(target);
+	if (headerAddr != nullptr) {
+		*headerAddr = header;
+	}
+	BYTE* data = InternalReadHiddenData(target, header.size, CUSTOMHEADERSIZE);
+	return data;
+	//lets just treat the data as txt for now
+}
+
 CustomHeader BitmapToolbox::ReadCustomHeader(BitmapFile* target) {
+
+	CustomHeader resultHeader;
+
+	BYTE* data = InternalReadHiddenData(target, CHEADER_SIZE);
+	resultHeader.size = *((int*)data);
+
+
+	data = InternalReadHiddenData(target, CHEADER_EXTENSION, CHEADER_SIZE);
+	memcpy(&(resultHeader.extension), &data, CHEADER_EXTENSION);
+
+
+	return resultHeader;
+}
+
+CustomHeader BitmapToolbox::ReadCustomHeader(RawFile* target) {
 
 	CustomHeader resultHeader;
 
@@ -190,6 +279,33 @@ BYTE* BitmapToolbox::InternalReadHiddenData(BitmapFile* target, int dataLengh, i
 		data[i - startingPoint] <<= 2;
 
 		targ = target->_pixelData + 4 * i + 3;
+		tmp = (*targ & 0b00000011);
+		data[i - startingPoint] |= (*targ & 0b00000011);
+
+	}
+	return data;
+}
+
+BYTE* BitmapToolbox::InternalReadHiddenData(RawFile* target, int dataLengh, int startingPoint) {
+	BYTE* data = new BYTE[dataLengh];
+	BYTE* pixelData = target->_buffer + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+	for (int i = startingPoint; i < dataLengh + startingPoint; i++) {
+		BYTE* targ = pixelData + 4 * i;
+		BYTE tmp = *targ & 0b00000011;
+		data[i - startingPoint] = (*targ & 0b00000011);
+		data[i - startingPoint] <<= 2;
+
+		targ = pixelData + 4 * i + 1;
+		tmp = (*targ & 0b00000011);
+		data[i - startingPoint] |= (*targ & 0b00000011);
+		data[i - startingPoint] <<= 2;
+
+		targ = pixelData + 4 * i + 2;
+		tmp = (*targ & 0b00000011);
+		data[i - startingPoint] |= (*targ & 0b00000011);
+		data[i - startingPoint] <<= 2;
+
+		targ = pixelData + 4 * i + 3;
 		tmp = (*targ & 0b00000011);
 		data[i - startingPoint] |= (*targ & 0b00000011);
 
